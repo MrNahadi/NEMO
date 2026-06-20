@@ -1,0 +1,38 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# NEMO generated run artifacts
+data/runs/*/
+!data/runs/.gitkeep
+!data/runs/active/
+data/runs/active/*
+!data/runs/active/.gitkeep
+reports/figures/*
+!reports/figures/.gitkeep
+reports/screenshots/*
+!reports/screenshots/.gitkeep
+
+# Fusion/local exports
+*.f3d
+*.f3z
+*.step
+*.stp
+*.iges
+*.igs
+*.stl
+*.mp4
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

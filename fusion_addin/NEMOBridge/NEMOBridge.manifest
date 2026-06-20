@@ -1,0 +1,11 @@
+{
+  "autodeskProduct": "Fusion360",
+  "type": "addin",
+  "author": "NEMO Project",
+  "description": "File-based bridge between Fusion 360 user parameters and the external NEMO optimizer.",
+  "supportedOS": "windows|mac",
+  "editEnabled": true,
+  "id": "NEMOBridge",
+  "version": "0.1.0",
+  "runOnStartup": false
+}

@@ -1,0 +1,4 @@
+{
+  "handshake_dir": "../../data/runs/active",
+  "poll_seconds": 1.0
+}
