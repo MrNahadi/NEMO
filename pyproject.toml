@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nemo-marine-optimizer"
 version = "0.1.0"
-description = "Nelder-Mead Marine Optimizer for a parametric bracket case study."
+description = "Multi-part, code-generated marine structural optimizer."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -26,3 +26,6 @@ nemo = "nemo.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"nemo.parts.definitions" = ["*.json"]

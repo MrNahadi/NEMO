@@ -1,0 +1,32 @@
+\chapter{Results and Discussion}
+\label{chap:results}
+
+\section{Bracket Results}
+The baseline used a 150 by 100 by 8~mm baseplate, 40~mm rib height, 6~mm rib thickness, and 5~mm fillet radius. Table~\ref{tab:bracket-results} summarizes the analytical campaign.
+
+\begin{table}[H]\centering
+\caption{Analytical bracket results}\label{tab:bracket-results}
+\begin{tabularx}{\textwidth}{lrrrr}\toprule
+\textbf{Design}&\textbf{Mass (kg)}&\textbf{Stress (MPa)}&\textbf{FOS}&\textbf{Deflection (mm)}\\\midrule
+Baseline&0.4181&41.53&6.65&0.196\\
+Best sample&0.2515&30.10&9.17&0.072\\
+Baseline-start result&0.1265&108.11&2.55&0.476\\
+Sample-start result&0.1126&106.30&2.60&0.361\\\bottomrule
+\end{tabularx}\end{table}
+
+The best sample reduced mass by 39.8\% but remained lightly utilized. The baseline-start search required 132 evaluations and approached the deflection constraint. The sample-start search required 134 evaluations and produced the lightest screened design: 100.09~mm length, 80.00~mm width, 4.01~mm base thickness, 33.64~mm rib height, 3.00~mm rib thickness, and 4.11~mm fillet radius.
+
+The predicted reduction was
+\begin{equation}\frac{0.418125-0.112593}{0.418125}\times100=73.1\%.\end{equation}
+Most dimensions approached their lower bounds. This reveals both the opportunity and risk of optimization: the algorithm exploited the simplified model and limits provided. Minimum plate gauge, bolt bearing, weldability, corrosion allowance, fatigue, vibration, and fabrication tolerance must be added before accepting such thin members.
+
+\section{Engineering Interpretation}
+Mass reduced with plate plan dimensions and thickness, while retained rib height preserved section depth and bending stiffness. The two searches converged to different rib-height and fillet combinations, confirming sensitivity to the starting point. Both final designs operated near the analytical FOS limit, so conservative backup candidates should accompany the lightest design during FEA.
+
+\section{Padeye and Stabilizer Outcomes}
+For the padeye, the project completed the load case, material model, nine-variable screening model, CAD generator, boundary definitions, and validation package. Critical regions are the pin-hole net section, bearing surface, lug root, gusset roots, and welded interfaces.
+
+For the stabilizer, the project completed the fixed-envelope internal-structure model, pressure bands, analytical screening, CAD generator, and validation package. Critical regions are the root, spar connections, skin-spar intersections, and trailing edge. These extensions demonstrate method portability but not service-ready designs.
+
+\section{Validation Status}
+CAD generation and export were achieved, but recorded Fusion maximum stress, FOS, and displacement values were absent from the validation checklists. All numerical structural results in Table~\ref{tab:bracket-results} are therefore analytical predictions. No claim of classification approval, FEA compliance, or fabrication readiness is made.

@@ -1,0 +1,11 @@
+\chapter{Methodology}
+
+The proposed study will investigate an Aluminium 6061-T6 marine equipment mounting bracket for a 50~kg auxiliary unit. With gravity 9.81~m/s$^2$ and dynamic factor 3, the adopted design load will be 1471.5~N. Material properties will be density 2700~kg/m$^3$, yield strength 276~MPa, elastic modulus 68.9~GPa, and Poisson ratio 0.33.
+
+Six variables will be investigated: baseplate length, width, and thickness; rib height and thickness; and fillet radius. Four 10~mm bolt holes and two ribs will remain fixed features. Designs will be required to satisfy factor of safety $FoS\geq2.5$ and deflection $\delta\leq0.5$~mm.
+
+Initial mass, bending stress, factor of safety, and displacement will be estimated using first-order plate and cantilever relations. Thirty Latin-hypercube samples will provide broad design-space coverage, followed by bounded Nelder--Mead searches from the baseline and the best sampled design. Constraint violations will attract objective penalties.
+
+Selected bracket candidates will be regenerated in Fusion 360 and checked using a linear static study. Material assignment, fixed bolt/base regions, equipment load, contacts, and mesh refinement at holes, rib roots, and fillets will be verified for each candidate. Results will record mass, maximum von Mises stress, minimum factor of safety, and maximum displacement. The final outcome will be described as the best compliant bracket found within the parameterized search.
+
+Lifting padeyes, stabilizer fins, hydrodynamic loading, fatigue, buckling, corrosion, and physical testing are reserved for future work.

@@ -1,0 +1,130 @@
+{
+  "candidates": [
+    {
+      "candidate_id": "baseline",
+      "source": "configured baseline",
+      "run_id": "baseline",
+      "iteration": 0,
+      "parameters_mm": {
+        "baseplate_length": 150.0,
+        "baseplate_width": 100.0,
+        "baseplate_thickness": 8.0,
+        "rib_height": 40.0,
+        "rib_thickness": 6.0,
+        "fillet_radius": 5.0
+      },
+      "analytical_metrics": {
+        "mass_kg": 0.418125166190299,
+        "max_stress_mpa": 41.53207428495761,
+        "factor_of_safety": 6.645466299282906,
+        "max_deflection_mm": 0.19564183771683455,
+        "objective_value": 0.418125166190299
+      }
+    },
+    {
+      "candidate_id": "candidate_01",
+      "source": "data\\runs\\formal_optimize_best_sample\\results.csv",
+      "run_id": "20260620_191531",
+      "iteration": 130,
+      "parameters_mm": {
+        "baseplate_length": 100.0876041131901,
+        "baseplate_width": 80.0,
+        "baseplate_thickness": 4.011023144543808,
+        "rib_height": 33.64097538633415,
+        "rib_thickness": 3.0,
+        "fillet_radius": 4.112035439633296
+      },
+      "analytical_metrics": {
+        "mass_kg": 0.11259275115646929,
+        "max_stress_mpa": 106.29669204447184,
+        "factor_of_safety": 2.596506012478061,
+        "max_deflection_mm": 0.36109273930423197,
+        "objective_value": 0.11259275115646929
+      }
+    },
+    {
+      "candidate_id": "candidate_02",
+      "source": "data\\runs\\formal_optimize_best_sample\\results.csv",
+      "run_id": "20260620_191531",
+      "iteration": 128,
+      "parameters_mm": {
+        "baseplate_length": 100.30754940791927,
+        "baseplate_width": 80.0,
+        "baseplate_thickness": 4.0,
+        "rib_height": 33.04301653634965,
+        "rib_thickness": 3.0,
+        "fillet_radius": 4.591812544660076
+      },
+      "analytical_metrics": {
+        "mass_kg": 0.11262382073482607,
+        "max_stress_mpa": 108.5163648225811,
+        "factor_of_safety": 2.543395186995495,
+        "max_deflection_mm": 0.380333710850011,
+        "objective_value": 0.11262382073482607
+      }
+    },
+    {
+      "candidate_id": "candidate_03",
+      "source": "data\\runs\\formal_optimize_best_sample\\results.csv",
+      "run_id": "20260620_191531",
+      "iteration": 125,
+      "parameters_mm": {
+        "baseplate_length": 100.73494406721481,
+        "baseplate_width": 80.0,
+        "baseplate_thickness": 4.003946682992703,
+        "rib_height": 33.17730545526281,
+        "rib_thickness": 3.0,
+        "fillet_radius": 3.9510409488647085
+      },
+      "analytical_metrics": {
+        "mass_kg": 0.11264953019261317,
+        "max_stress_mpa": 109.48650193927374,
+        "factor_of_safety": 2.5208586913579754,
+        "max_deflection_mm": 0.37927566654395456,
+        "objective_value": 0.11264953019261317
+      }
+    },
+    {
+      "candidate_id": "candidate_04",
+      "source": "data\\runs\\formal_optimize_best_sample\\results.csv",
+      "run_id": "20260620_191531",
+      "iteration": 129,
+      "parameters_mm": {
+        "baseplate_length": 100.03540740952971,
+        "baseplate_width": 80.0,
+        "baseplate_thickness": 4.0,
+        "rib_height": 32.84313110403917,
+        "rib_thickness": 3.0,
+        "fillet_radius": 5.048661575372192
+      },
+      "analytical_metrics": {
+        "mass_kg": 0.11267690049001608,
+        "max_stress_mpa": 108.3318305559954,
+        "factor_of_safety": 2.547727649237303,
+        "max_deflection_mm": 0.3843536946331041,
+        "objective_value": 0.11267690049001608
+      }
+    },
+    {
+      "candidate_id": "candidate_05",
+      "source": "data\\runs\\formal_optimize_best_sample\\results.csv",
+      "run_id": "20260620_191531",
+      "iteration": 123,
+      "parameters_mm": {
+        "baseplate_length": 100.48773456901269,
+        "baseplate_width": 80.0,
+        "baseplate_thickness": 4.00025732580294,
+        "rib_height": 33.560657635059414,
+        "rib_thickness": 3.0,
+        "fillet_radius": 4.049483585589451
+      },
+      "analytical_metrics": {
+        "mass_kg": 0.11269790506851972,
+        "max_stress_mpa": 107.22653905958944,
+        "factor_of_safety": 2.5739896337288046,
+        "max_deflection_mm": 0.3665179584357222,
+        "objective_value": 0.11269790506851972
+      }
+    }
+  ]
+}

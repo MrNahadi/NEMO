@@ -1,0 +1,262 @@
+\documentclass[12pt, a4paper]{report}
+
+% ==============================================================================
+% UPRO Project Report TEMPLATE - MAIN FILE
+% ==============================================================================
+
+% Recommended Packages
+\usepackage{graphicx}       % For handling images
+\usepackage{amsmath, amssymb} % For mathematical symbols
+\usepackage{geometry}       % For page layout
+\usepackage{pgfgantt}       % For Gantt charts
+\usepackage{setspace}       % For line spacing
+\usepackage{cite}           % For IEEE citations
+\usepackage{hyperref}       % For hyperlinks in PDF
+\usepackage{titlesec}       % For custom chapter/section formatting
+\usepackage{caption}        % For better caption formatting
+\usepackage{listings}       % For code listings
+\usepackage{booktabs}       % For professional table formatting
+\usepackage{xcolor}         % For code highlighting
+\usepackage{tikz}           % For flowcharts
+\usepackage{pdflscape}      % For landscape pages
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{float}
+
+\usetikzlibrary{shapes.geometric, arrows, positioning}
+
+% TikZ Styles - Mermaid-like Theme
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=blue!60!black, fill=blue!5, thick]
+\tikzstyle{process} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=blue!60!black, fill=blue!5, thick]
+\tikzstyle{decision} = [diamond, aspect=2, minimum width=3cm, minimum height=1cm, text centered, draw=blue!60!black, fill=blue!5, thick]
+\tikzstyle{arrow} = [thick,->,>=stealth, draw=blue!60!black]
+
+% Code Listing Settings
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  commentstyle=\color{green!50!black},
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  captionpos=b
+}
+
+% Page Layout Settings (UPRO Standard)
+\geometry{
+    top=2cm,
+    bottom=2.5cm,
+    left=1in, % Binding margin
+    right=1in
+}
+\onehalfspacing % Standard 1.5 line spacing
+
+% Hyperlink Setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=black,
+    citecolor=black,
+    plainpages=false
+}
+
+\captionsetup[table]{justification=centering,singlelinecheck=false}
+
+\begin{document}
+
+% ==============================================================================
+% METADATA - TO BE FILLED
+% ==============================================================================
+\title{Engineering Design and Optimization of Parameterized Marine Structural Components}
+\author{Student Name}
+\date{\today}
+
+% ==============================================================================
+% FRONT MATTER
+% ==============================================================================
+
+% Custom Title Page
+\hypersetup{pageanchor=false}
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+
+{\setstretch{1.0}
+
+\vspace*{0.3cm}
+
+\includegraphics[width=0.22\textwidth]{./media/HDlogo.png}\\[0.6cm]
+
+JOMO KENYATTA UNIVERSITY\\[0.3cm]
+OF\\[0.3cm]
+AGRICULTURE AND TECHNOLOGY\\[0.5cm]
+
+COLLEGE OF ENGINEERING AND TECHNOLOGY\\[0.5cm]
+
+SCHOOL OF MECHANICAL, MANUFACTURING AND MATERIALS ENGINEERING\\[0.5cm]
+
+DEPARTMENT OF MARINE ENGINEERING AND MARITIME OPERATIONS\\[0.5cm]
+
+BACHELOR OF SCIENCE IN MARINE ENGINEERING
+
+\vspace{0.7cm}
+\hrule
+
+\vspace{0.4cm}
+
+\textbf{ENGINEERING DESIGN AND OPTIMIZATION OF PARAMETERIZED MARINE STRUCTURAL COMPONENTS}
+
+\vspace{0.4cm}
+
+\hrule
+
+\vspace{0.7cm}
+
+{\normalsize \textbf{MR-PRO-26-XX}}\\
+
+\vspace{0.3cm}
+
+{\normalsize by}\\[0.25cm]
+{\large \textbf{AMINA AHMED BWANA - ENM241-0087/2022}}\\[0.1cm]
+
+{\large \textbf{MBOJE ABDULLAH - ENM241-0088/2022}}\\[0.1cm]
+
+\vspace{0.5cm}
+
+{\normalsize Supervised by}\\[0.2cm]
+{\large \textbf{SUPERVISOR NAME}}
+
+\vfill
+
+{\footnotesize \textit{A project report submitted in partial fulfilment of the requirements}}\\
+{\footnotesize \textit{for the award of the Degree of BACHELOR OF SCIENCE IN MARINE ENGINEERING}}\\
+{\footnotesize \textit{at the Jomo Kenyatta University of Agriculture and Technology}}\\
+
+}
+\end{center}
+\end{titlepage}
+\hypersetup{pageanchor=true}
+
+%----------------------------------------------------------------------------------------
+%	PREAMBLE PAGES
+%----------------------------------------------------------------------------------------
+
+\pagenumbering{roman} % Roman numerals for preamble
+
+% 1. Declaration
+\section*{DECLARATION}
+\addcontentsline{toc}{section}{Declaration}
+
+We hereby declare that this Project Report is our original work and has not been presented for a degree in any other university or for any other award.
+
+\vspace{1cm}
+\noindent
+\textbf{Name:} Amina Ahmed Bwana \hfill \textbf{REG NUMBER:} ENM241-0087/2022\\
+\vspace{0.5cm}
+\noindent
+\textbf{Signature:} \underline{\hspace{5cm}} \hfill \textbf{Date:} \underline{\hspace{4cm}}
+
+\vspace{1cm}
+\noindent
+\textbf{Name:} Mboje Abdullah \hfill \textbf{REG NUMBER:} ENM241-0088/2022\\
+\vspace{0.5cm}
+\noindent
+\textbf{Signature:} \underline{\hspace{5cm}} \hfill \textbf{Date:} \underline{\hspace{4cm}}
+
+\vspace{1cm}
+\noindent
+\textbf{Supervisor Declaration:}
+
+\noindent
+This Project Report has been submitted for examination with my approval as the University Supervisor.
+
+\vspace{1cm}
+
+\noindent
+\textbf{Name:} Supervisor Name
+\vspace{1cm}
+
+\noindent
+\textbf{Signature:} \underline{\hspace{5cm}} \hfill \textbf{Date:} \underline{\hspace{4cm}}
+
+\newpage
+
+\chapter*{Dedication}
+\addcontentsline{toc}{section}{Dedication}
+
+We dedicate this Project Report to our parents, guardians, lecturers, and mentors whose encouragement, sacrifice, and guidance have supported our academic journey.
+
+\newpage
+
+\chapter*{Acknowledgements}
+\addcontentsline{toc}{section}{Acknowledgements}
+
+We would like to express our sincere gratitude to all those who contributed to the completion of this Project Report. We extend our deepest appreciation to our supervisor for invaluable guidance and constructive feedback.
+
+\newpage
+
+\chapter*{Abstract}
+\addcontentsline{toc}{section}{Abstract}
+
+This project investigated the constrained mass optimization of marine structural components using parameterized geometry and first-order structural models. The primary case was an Aluminium 6061-T6 equipment bracket carrying a 50~kg auxiliary unit under a 1471.5~N design load. A 30-point Latin-hypercube study and two bounded Nelder--Mead searches were completed. The baseline analytical mass was 0.4181~kg; the lightest screened candidate had a mass of 0.1126~kg, factor of safety 2.60, and deflection 0.361~mm, giving a 73.1\% analytical mass reduction. The method was extended to an S275 lifting padeye and a fixed-envelope aluminium stabilizer fin through engineering definitions, analytical models, CAD generators, and validation packages. Fusion stress results were not recorded in the available validation tables; consequently, reported stress and deflection values are screening predictions requiring mesh-converged FEA and physical validation before fabrication.
+
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+
+% 2. List of Abbreviations and Symbols
+\section*{LIST OF ABBREVIATIONS AND SYMBOLS}
+\addcontentsline{toc}{section}{List of Abbreviations and Symbols}
+
+\subsection*{Abbreviations}
+\begin{tabular}{ll}
+\textbf{FEA} & Finite Element Analysis \\
+\textbf{CAD} & Computer-Aided Design \\
+\textbf{FOS} & Factor of Safety \\
+\textbf{API} & Application Programming Interface \\
+\textbf{IPC} & Inter-Process Communication \\
+\textbf{LHS} & Latin-Hypercube Sampling \\
+\end{tabular}
+
+\vspace{1cm}
+
+\subsection*{Symbols}
+\begin{tabular}{ll}
+$m$ & Mass (kg) \\
+$\sigma$ & Stress (MPa) \\
+$g$ & Acceleration due to gravity (m/s$^2$) \\
+$\delta$ & Deflection (mm) \\
+\end{tabular}
+
+\newpage
+
+\clearpage
+% ==============================================================================
+% MAIN CONTENT
+% ==============================================================================
+% Arabic numerals for main content
+\pagenumbering{arabic}
+% Chapters will be included here
+
+\input{structure/01-introduction}
+\input{structure/02-literature-review}
+\input{structure/03-methodology}
+\input{structure/04-results-discussion}
+\input{structure/05-conclusion}
+\appendix
+\input{structure/06-appendices}
+
+% ==============================================================================
+% REFERENCES
+% ==============================================================================
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

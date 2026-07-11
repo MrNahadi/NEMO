@@ -1,4 +1,6 @@
 {
   "handshake_dir": "../../data/runs/active",
+  "artifact_dir": "../../data/runs/active/artifacts",
+  "part_definition_dir": "../../src/nemo/parts/definitions",
   "poll_seconds": 1.0
 }

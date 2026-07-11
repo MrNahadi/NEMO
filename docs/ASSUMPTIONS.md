@@ -4,6 +4,11 @@
 
 The case-study component is a marine equipment mounting bracket for a small auxiliary unit such as a pump. The geometry is intentionally simple enough to parametrize with six variables and validate with a first-order hand calculation.
 
+NEMO now also includes a 500 kg-class gusseted lifting padeye and a fixed-envelope
+small-craft stabilizer. Their dimensions, materials, loads, and constraints are
+defined in the packaged part manifests. The stabilizer optimization changes
+internal structure only; it does not claim hydrodynamic shape optimization.
+
 ## Material
 
 - Material: Aluminum 6061-T6
@@ -36,3 +41,14 @@ The fallback model estimates:
 - deflection from a cantilever beam approximation and an effective second moment of area.
 
 This model is for optimizer guidance only. Final claims must be validated in Fusion FEA.
+
+The padeye and stabilizer analytical models have the same screening role. They
+are deliberately conservative first-order section models and are not substitutes
+for the documented manual Fusion validation.
+
+## Propeller Boundary
+
+A propeller generator and optimizer remain future work. A defensible propeller
+study must provide thrust, torque, efficiency, cavitation, centrifugal loading,
+and hydrodynamic pressure through a blade-element or CFD model before varying
+pitch, chord, skew, or rake.

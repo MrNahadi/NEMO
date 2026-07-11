@@ -1,0 +1,192 @@
+{
+  "schema_version": 2,
+  "part_id": "bracket",
+  "candidates": [
+    {
+      "candidate_id": "baseline",
+      "part_id": "bracket",
+      "source": "configured baseline",
+      "run_id": "baseline",
+      "iteration": 0,
+      "parameters": {
+        "baseplate_length": 150.0,
+        "baseplate_width": 100.0,
+        "baseplate_thickness": 8.0,
+        "rib_height": 40.0,
+        "rib_thickness": 6.0,
+        "fillet_radius": 5.0
+      },
+      "parameters_mm": {
+        "baseplate_length": 150.0,
+        "baseplate_width": 100.0,
+        "baseplate_thickness": 8.0,
+        "rib_height": 40.0,
+        "rib_thickness": 6.0,
+        "fillet_radius": 5.0
+      },
+      "analytical_metrics": {
+        "mass_kg": 0.418125166190299,
+        "max_stress_mpa": 41.53207428495761,
+        "factor_of_safety": 6.645466299282906,
+        "max_deflection_mm": 0.19564183771683455,
+        "objective_value": 0.418125166190299,
+        "volume_m3": 0.0001548611726630737
+      }
+    },
+    {
+      "candidate_id": "candidate_01",
+      "part_id": "bracket",
+      "source": "data\\runs\\bracket_optimize_baseline\\results.csv",
+      "run_id": "20260711_122526_819466",
+      "iteration": 125,
+      "parameters": {
+        "baseplate_length": 104.97608371997302,
+        "baseplate_width": 80.39005733087387,
+        "baseplate_thickness": 4.0357574247714,
+        "rib_height": 31.268197602759603,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.784727873597001
+      },
+      "parameters_mm": {
+        "baseplate_length": 104.97608371997302,
+        "baseplate_width": 80.39005733087387,
+        "baseplate_thickness": 4.0357574247714,
+        "rib_height": 31.268197602759603,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.784727873597001
+      },
+      "analytical_metrics": {
+        "volume_m3": 4.686869572820487e-05,
+        "mass_kg": 0.12654547846615316,
+        "max_stress_mpa": 108.10720062254295,
+        "factor_of_safety": 2.553021430678387,
+        "max_deflection_mm": 0.47583782502669447,
+        "objective_value": 0.12654547846615316
+      }
+    },
+    {
+      "candidate_id": "candidate_02",
+      "part_id": "bracket",
+      "source": "data\\runs\\bracket_optimize_baseline\\results.csv",
+      "run_id": "20260711_122526_819466",
+      "iteration": 122,
+      "parameters": {
+        "baseplate_length": 104.56367831263415,
+        "baseplate_width": 80.0,
+        "baseplate_thickness": 4.101953512027696,
+        "rib_height": 30.952674278691283,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.730702320641715
+      },
+      "parameters_mm": {
+        "baseplate_length": 104.56367831263415,
+        "baseplate_width": 80.0,
+        "baseplate_thickness": 4.101953512027696,
+        "rib_height": 30.952674278691283,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.730702320641715
+      },
+      "analytical_metrics": {
+        "volume_m3": 4.6898670280156286e-05,
+        "mass_kg": 0.12662640975642198,
+        "max_stress_mpa": 108.80988598628024,
+        "factor_of_safety": 2.536534226630847,
+        "max_deflection_mm": 0.4808234228323813,
+        "objective_value": 0.12662640975642198
+      }
+    },
+    {
+      "candidate_id": "candidate_03",
+      "part_id": "bracket",
+      "source": "data\\runs\\bracket_optimize_baseline\\results.csv",
+      "run_id": "20260711_122526_819466",
+      "iteration": 124,
+      "parameters": {
+        "baseplate_length": 104.57736495689686,
+        "baseplate_width": 80.2342296368095,
+        "baseplate_thickness": 4.0582013188834285,
+        "rib_height": 30.609355010523153,
+        "rib_thickness": 3.1239992720223104,
+        "fillet_radius": 9.805036641859411
+      },
+      "parameters_mm": {
+        "baseplate_length": 104.57736495689686,
+        "baseplate_width": 80.2342296368095,
+        "baseplate_thickness": 4.0582013188834285,
+        "rib_height": 30.609355010523153,
+        "rib_thickness": 3.1239992720223104,
+        "fillet_radius": 9.805036641859411
+      },
+      "analytical_metrics": {
+        "volume_m3": 4.701701201485826e-05,
+        "mass_kg": 0.1269459324401173,
+        "max_stress_mpa": 107.70607200677865,
+        "factor_of_safety": 2.562529622124085,
+        "max_deflection_mm": 0.4805066381971737,
+        "objective_value": 0.1269459324401173
+      }
+    },
+    {
+      "candidate_id": "candidate_04",
+      "part_id": "bracket",
+      "source": "data\\runs\\bracket_optimize_baseline\\results.csv",
+      "run_id": "20260711_122526_819466",
+      "iteration": 131,
+      "parameters": {
+        "baseplate_length": 105.4769097500957,
+        "baseplate_width": 80.29257011458391,
+        "baseplate_thickness": 4.00900872598096,
+        "rib_height": 32.353647207417104,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.723235778871745
+      },
+      "parameters_mm": {
+        "baseplate_length": 105.4769097500957,
+        "baseplate_width": 80.29257011458391,
+        "baseplate_thickness": 4.00900872598096,
+        "rib_height": 32.353647207417104,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.723235778871745
+      },
+      "analytical_metrics": {
+        "volume_m3": 4.7103915664646685e-05,
+        "mass_kg": 0.12718057229454605,
+        "max_stress_mpa": 103.52982612287686,
+        "factor_of_safety": 2.665898421121878,
+        "max_deflection_mm": 0.44179932394232796,
+        "objective_value": 0.12718057229454605
+      }
+    },
+    {
+      "candidate_id": "candidate_05",
+      "part_id": "bracket",
+      "source": "data\\runs\\bracket_optimize_baseline\\results.csv",
+      "run_id": "20260711_122526_819466",
+      "iteration": 128,
+      "parameters": {
+        "baseplate_length": 105.55992929232107,
+        "baseplate_width": 80.29257011458391,
+        "baseplate_thickness": 4.004733330393894,
+        "rib_height": 32.47576162002365,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.797123489434405
+      },
+      "parameters_mm": {
+        "baseplate_length": 105.55992929232107,
+        "baseplate_width": 80.29257011458391,
+        "baseplate_thickness": 4.004733330393894,
+        "rib_height": 32.47576162002365,
+        "rib_thickness": 3.0,
+        "fillet_radius": 9.797123489434405
+      },
+      "analytical_metrics": {
+        "volume_m3": 4.720614283146606e-05,
+        "mass_kg": 0.12745658564495835,
+        "max_stress_mpa": 102.87134968578918,
+        "factor_of_safety": 2.6829627572984696,
+        "max_deflection_mm": 0.43841966240909325,
+        "objective_value": 0.12745658564495835
+      }
+    }
+  ]
+}

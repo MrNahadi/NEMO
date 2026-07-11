@@ -1,0 +1,27 @@
+\chapter{Engineering Methodology}
+\label{chap:methodology}
+
+\section{Bracket Definition}
+The bracket represented a foundation for a 50~kg auxiliary machine. Aluminium 6061-T6 was assigned density 2700~kg/m$^3$, yield strength 276~MPa, elastic modulus 68.9~GPa, and Poisson ratio 0.33. The adopted load was
+\begin{equation}F_d=mg\gamma_d=50(9.81)(3)=1471.5~\mathrm{N},\end{equation}
+where the dynamic factor of 3 is an engineering envelope rather than a modal-analysis result.
+
+Six variables were investigated: baseplate length (100--200~mm), width (80--150~mm), thickness (4--15~mm), rib height (20--60~mm), rib thickness (3--10~mm), and fillet radius (2--10~mm). Four 10~mm bolt holes and two ribs were fixed features. Acceptance required $FoS\geq2.5$ and $\delta\leq0.5$~mm.
+
+Mass was estimated from plate and rib volume less bolt holes. Stress and displacement were screened using equivalent cantilever relations:
+\begin{align}M&=F_de, & \sigma_{max}&=M/Z_{eff}, & FoS&=\sigma_y/\sigma_{max},\\
+\delta&=F_de^3/(3EI_{eff}).&&&&
+\end{align}
+These relations do not resolve bolt bearing, weld-toe stress, local contact, or three-dimensional restraint.
+
+\section{Padeye Definition}
+The padeye comprised an S275 steel doubler plate, tapered lug, 50~mm pin hole, twin gussets, and root fillets. A 500~kg working load and dynamic factor 3 produced 14,715~N pin-bearing load. Nine variables controlled the plate, lug, neck, gussets, and fillets. Acceptance required $FoS\geq2.5$ and displacement below 0.5~mm.
+
+\section{Stabilizer Definition}
+The stabilizer retained a NACA 0015 envelope with 800~mm span, 500~mm root chord, 250~mm tip chord, and 12-degree sweep. Nine internal-structure variables controlled skins, spars, ribs, and root reinforcement. A 11,808~N resultant load was distributed over four spanwise pressure bands. Acceptance required $FoS\geq2.5$ and tip displacement below 5~mm. Because pressure was prescribed rather than obtained from CFD, this was structural sizing rather than hydrodynamic optimization.
+
+\section{Sampling and Optimization}
+Thirty bracket designs were evaluated using Latin-hypercube sampling \cite{mckay1979comparison}. Two bounded Nelder--Mead searches of 80 iterations were then started from the baseline and best sampled design \cite{nelder1965simplex,lagarias1998convergence}. Mass was penalized for normalized factor-of-safety or deflection violations. The result was interpreted as the best design found within the chosen variables and starts, not a guaranteed global optimum.
+
+\section{CAD and Validation Procedure}
+Fusion 360 generators rebuilt each component and exported STEP geometry and boundary metadata. Candidate packages identified fixed supports, loads, pressure bands, and monitoring points. Intended FEA verification used linear static studies with local mesh refinement at holes, fillets, roots, gussets, and spar intersections. The available checklists contain no completed Fusion stress, FOS, or displacement entries; analytical screening results are therefore reported separately from FEA validation.

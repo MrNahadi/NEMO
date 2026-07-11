@@ -1,0 +1,55 @@
+(.venv) PS C:\Users\muigu\Documents\Projects\NEMO> .\.venv\Scripts\nemo.exe evaluate --part bracket
+{
+  "schema_version": 2,
+  "part_id": "bracket",
+  "run_id": "20260711_122100_153055",
+  "iteration": 0,
+  "status": "ok",
+  "metrics": {
+    "mass_kg": 0.418125166190299,
+    "max_stress_mpa": 41.53207428495761,
+    "factor_of_safety": 6.645466299282906,
+    "max_deflection_mm": 0.19564183771683455,
+    "objective_value": 0.418125166190299,
+    "volume_m3": 0.0001548611726630737
+  },
+  "artifacts": {},
+  "error": null
+}
+(.venv) PS C:\Users\muigu\Documents\Projects\NEMO> .\.venv\Scripts\nemo.exe evaluate --part padeye
+{
+  "schema_version": 2,
+  "part_id": "padeye",
+  "run_id": "20260711_122100_644895",
+  "iteration": 0,
+  "status": "ok",
+  "metrics": {
+    "mass_kg": 10.489372069742139,
+    "max_stress_mpa": 46.107000000000006,
+    "factor_of_safety": 5.964387186327455,
+    "max_deflection_mm": 0.013428724785363576,
+    "objective_value": 10.489372069742139,
+    "volume_m3": 0.0013362257413684253
+  },
+  "artifacts": {},
+  "error": null
+}
+(.venv) PS C:\Users\muigu\Documents\Projects\NEMO> .\.venv\Scripts\nemo.exe evaluate --part stabilizer
+{
+  "schema_version": 2,
+  "part_id": "stabilizer",
+  "run_id": "20260711_122113_208304",
+  "iteration": 0,
+  "status": "ok",
+  "metrics": {
+    "mass_kg": 19.65559270986428,
+    "max_stress_mpa": 86.98525488162768,
+    "factor_of_safety": 3.1729515580035907,
+    "max_deflection_mm": 3.3367499929219804,
+    "objective_value": 19.65559270986428,
+    "volume_m3": 0.007279849151801585
+  },
+  "artifacts": {},
+  "error": null
+}
+(.venv) PS C:\Users\muigu\Documents\Projects\NEMO> 

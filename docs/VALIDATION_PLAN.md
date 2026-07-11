@@ -1,6 +1,6 @@
 # Validation Plan
 
-## Baseline Validation
+## Multi-Part Baseline Validation
 
 1. Build the baseline Fusion bracket with the documented user parameters.
 2. Assign Aluminum 6061-T6.
@@ -9,6 +9,11 @@
 5. Solve the static stress study with a medium mesh.
 6. Record mass, max stress, FOS, and max deflection.
 7. Compare against the analytical baseline from `nemo evaluate`.
+
+Repeat the process with `--part padeye` and `--part stabilizer`, using each
+part's generated validation checklist and boundary metadata. The padeye applies
+14.715 kN at `pin_bearing`; the stabilizer applies 11.808 kN across four
+pressure bands and monitors `tip_monitor`.
 
 ## Candidate Validation
 
@@ -20,9 +25,26 @@ If the project uses the analytical fallback, validate:
 - the best feasible analytical design,
 - the next 2-4 lightest feasible analytical candidates.
 
+Generated packages:
+
+- `reports/fusion_validation_package`: aggressive candidates selected with analytical FOS >= 2.5 and deflection <= 0.5 mm.
+- `reports/fusion_validation_package_conservative`: backup candidates selected with analytical FOS >= 3.0 and deflection <= 0.4 mm.
+
+Use the aggressive package first. If Fusion shows the analytical model is optimistic and the lightest candidates fail, validate the conservative package next.
+
 ## Acceptance Criteria
 
 - Final candidate satisfies FOS >= 2.5 in Fusion.
 - Final candidate satisfies deflection <= 0.5 mm in Fusion.
 - Report states the percent difference between analytical and Fusion values.
 - Final claim uses this wording: "best design found within this parameterized search."
+
+## CAD Generator Acceptance
+
+- Generate the baseline and 20 seeded Latin-hypercube vectors per new part.
+- Require a healthy Fusion timeline, positive volume, and successful STEP plus
+  boundary-sidecar export for every vector.
+- Re-import one baseline and one extreme candidate per part; require volume
+  agreement within 0.5%.
+- Because the generator rebuilds its component to ensure all values affect the
+  solid, verify or reapply simulation references before every manual solve.

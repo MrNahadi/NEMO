@@ -1,0 +1,13 @@
+{
+  "run_id": "fusion_validation",
+  "iteration": 3,
+  "mode": "auto_fea",
+  "parameters_mm": {
+    "baseplate_length": 100.0,
+    "baseplate_width": 80.0,
+    "baseplate_thickness": 4.129374157180943,
+    "rib_height": 38.65827479100652,
+    "rib_thickness": 3.0,
+    "fillet_radius": 2.55792683483645
+  }
+}

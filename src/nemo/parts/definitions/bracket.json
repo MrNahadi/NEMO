@@ -1,0 +1,19 @@
+{
+  "part_id": "bracket",
+  "name": "Marine equipment mounting bracket",
+  "description": "Original six-parameter NEMO bracket case study.",
+  "analytical_model": "bracket",
+  "parameters": [
+    {"name": "baseplate_length", "unit": "mm", "lower": 100, "upper": 200, "baseline": 150, "description": "Mounting baseplate length"},
+    {"name": "baseplate_width", "unit": "mm", "lower": 80, "upper": 150, "baseline": 100, "description": "Mounting baseplate width"},
+    {"name": "baseplate_thickness", "unit": "mm", "lower": 4, "upper": 15, "baseline": 8, "description": "Baseplate thickness"},
+    {"name": "rib_height", "unit": "mm", "lower": 20, "upper": 60, "baseline": 40, "description": "Reinforcing rib height"},
+    {"name": "rib_thickness", "unit": "mm", "lower": 3, "upper": 10, "baseline": 6, "description": "Reinforcing rib thickness"},
+    {"name": "fillet_radius", "unit": "mm", "lower": 2, "upper": 10, "baseline": 5, "description": "Rib-to-baseplate fillet radius"}
+  ],
+  "material": {"name": "Aluminum 6061-T6", "density_kg_m3": 2700, "yield_strength_mpa": 276, "elastic_modulus_pa": 68900000000, "poisson_ratio": 0.33},
+  "constraints": {"min_factor_of_safety": 2.5, "max_deflection_mm": 0.5, "penalty_weight": 100},
+  "load": {"type": "equipment_weight", "design_load_n": 1471.5, "equipment_mass_kg": 50, "dynamic_factor": 3},
+  "fixed_geometry": {"bolt_hole_diameter_mm": 10, "bolt_hole_count": 4, "rib_count": 2},
+  "boundary_tags": ["fixed_support", "equipment_load"]
+}

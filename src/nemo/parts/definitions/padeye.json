@@ -1,0 +1,22 @@
+{
+  "part_id": "padeye",
+  "name": "Gusseted marine lifting padeye",
+  "description": "A welded doubler plate, tapered lifting lug, pin hole, twin gussets and filleted transitions.",
+  "analytical_model": "padeye",
+  "parameters": [
+    {"name": "base_length", "unit": "mm", "lower": 220, "upper": 320, "baseline": 260, "description": "Doubler plate length"},
+    {"name": "base_width", "unit": "mm", "lower": 150, "upper": 230, "baseline": 180, "description": "Doubler plate width"},
+    {"name": "base_thickness", "unit": "mm", "lower": 8, "upper": 22, "baseline": 14, "description": "Doubler plate thickness"},
+    {"name": "lug_height", "unit": "mm", "lower": 140, "upper": 230, "baseline": 180, "description": "Height above the doubler plate"},
+    {"name": "lug_thickness", "unit": "mm", "lower": 12, "upper": 30, "baseline": 20, "description": "Central lug thickness"},
+    {"name": "neck_width", "unit": "mm", "lower": 80, "upper": 140, "baseline": 100, "description": "Lug width through the pin centre"},
+    {"name": "gusset_height", "unit": "mm", "lower": 70, "upper": 150, "baseline": 110, "description": "Twin gusset height"},
+    {"name": "gusset_thickness", "unit": "mm", "lower": 6, "upper": 18, "baseline": 10, "description": "Twin gusset thickness"},
+    {"name": "fillet_radius", "unit": "mm", "lower": 8, "upper": 25, "baseline": 15, "description": "Lug and gusset root fillet radius"}
+  ],
+  "material": {"name": "S275 structural steel", "density_kg_m3": 7850, "yield_strength_mpa": 275, "elastic_modulus_pa": 210000000000, "poisson_ratio": 0.3},
+  "constraints": {"min_factor_of_safety": 2.5, "max_deflection_mm": 0.5, "penalty_weight": 100},
+  "load": {"type": "pin_bearing", "design_load_n": 14715, "working_load_kg": 500, "dynamic_factor": 3},
+  "fixed_geometry": {"pin_hole_diameter_mm": 50, "gusset_count": 2},
+  "boundary_tags": ["fixed_support", "pin_bearing"]
+}

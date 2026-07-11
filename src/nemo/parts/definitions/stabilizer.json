@@ -1,0 +1,22 @@
+{
+  "part_id": "stabilizer",
+  "name": "Hollow small-craft stabilizer fin",
+  "description": "A fixed NACA 0015 envelope with parameterized skins, spars, ribs and root reinforcement.",
+  "analytical_model": "stabilizer",
+  "parameters": [
+    {"name": "skin_thickness", "unit": "mm", "lower": 4, "upper": 12, "baseline": 7, "description": "Outer skin thickness"},
+    {"name": "front_spar_position", "unit": "%", "lower": 25, "upper": 38, "baseline": 30, "description": "Front spar chord position"},
+    {"name": "rear_spar_position", "unit": "%", "lower": 58, "upper": 72, "baseline": 65, "description": "Rear spar chord position"},
+    {"name": "front_spar_thickness", "unit": "mm", "lower": 4, "upper": 14, "baseline": 8, "description": "Front spar web thickness"},
+    {"name": "rear_spar_thickness", "unit": "mm", "lower": 4, "upper": 12, "baseline": 6, "description": "Rear spar web thickness"},
+    {"name": "rib_thickness", "unit": "mm", "lower": 3, "upper": 9, "baseline": 5, "description": "Thickness of the three internal ribs"},
+    {"name": "root_insert_length", "unit": "mm", "lower": 120, "upper": 260, "baseline": 180, "description": "Spanwise root reinforcement length"},
+    {"name": "root_insert_thickness", "unit": "mm", "lower": 8, "upper": 20, "baseline": 12, "description": "Root reinforcement thickness"},
+    {"name": "root_fillet_radius", "unit": "mm", "lower": 12, "upper": 40, "baseline": 25, "description": "Fin-to-flange root fillet radius"}
+  ],
+  "material": {"name": "Aluminum 6061-T6", "density_kg_m3": 2700, "yield_strength_mpa": 276, "elastic_modulus_pa": 68900000000, "poisson_ratio": 0.33},
+  "constraints": {"min_factor_of_safety": 2.5, "max_deflection_mm": 5, "penalty_weight": 100},
+  "load": {"type": "spanwise_pressure", "design_load_n": 11808, "speed_m_s": 8, "seawater_density_kg_m3": 1025, "lift_coefficient": 0.8, "dynamic_factor": 1.5, "pressure_weights": [1.0, 0.93, 0.75, 0.4]},
+  "fixed_geometry": {"profile": "NACA0015", "span_mm": 800, "root_chord_mm": 500, "tip_chord_mm": 250, "sweep_deg": 12, "trailing_edge_mm": 8, "root_flange_length_mm": 560, "root_flange_width_mm": 160, "root_flange_thickness_mm": 18, "rib_stations": [0.25, 0.5, 0.75]},
+  "boundary_tags": ["fixed_support", "pressure_band_1", "pressure_band_2", "pressure_band_3", "pressure_band_4", "tip_monitor"]
+}

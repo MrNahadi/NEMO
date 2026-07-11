@@ -1,0 +1,138 @@
+\chapter{Detailed Workplan and Project Management}
+\label{chap:workplan}
+
+\section{Introduction}
+The execution of the NEMO project requires a meticulously structured approach to synchronize the development of the parametric CAD/FEA environment with the sophisticated Python-based optimization architecture. The project will be executed over a comprehensive 13-week timeline, culminating in the submission of the final report and a live demonstration of the automated pipeline. This chapter details the weekly schedule, rigorous risk management strategies, resource allocation, and contingency plans designed to ensure project success.
+
+\section{Extensive 13-Week Project Timeline}
+The timeline is divided into distinct phases: Foundation and Setup, Integration and Proof of Concept, Optimization and Analytics, and Finalization.
+
+\begin{longtable}{p{1.5cm} p{2.5cm} p{10cm}}
+    \caption{Detailed 13-Week Project Timeline}
+    \label{tab:detailed_timeline} \\
+    \toprule
+    \textbf{Week} & \textbf{Phase} & \textbf{Detailed Deliverables and Milestones} \\
+    \midrule
+    \endfirsthead
+
+    \caption[]{Detailed 13-Week Project Timeline (Continued)} \\
+    \toprule
+    \textbf{Week} & \textbf{Phase} & \textbf{Detailed Deliverables and Milestones} \\
+    \midrule
+    \endhead
+
+    \midrule
+    \multicolumn{3}{r}{\textit{Continued on next page}} \\
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+        1 & Foundation & \textbf{Component Selection \& API Verification:} Finalize the target component (e.g., mounting bracket). Perform baseline analytical hand calculations to establish expected stress ranges. Verify the basic Python-to-CAD API environment by executing simple geometry generation scripts. \\
+        2 & Foundation & \textbf{Parametric Modeling \& FEA Setup:} Complete the fully parametric CAD model ensuring robustness against geometric singularities during parameter sweeping. Validate the static structural FEA study template. Document the JSON/XML communication schema for parameter exchange. \\
+        3 & Integration & \textbf{Fusion CAD Control:} Test the JSON handshake and Fusion add-in used to generate geometry and export artifacts while Fusion remains open. \\
+        4 & Integration & \textbf{Proof-of-Concept Loop:} Demonstrate CAD regeneration, mass calculation, STEP and boundary-metadata export, and response parsing; define manual FEA validation. \\
+        5 & Integration & \textbf{Pipeline Hardening \& Logging:} Build a comprehensive iteration logger (CSV/JSON). Execute a multi-iteration test to verify that the pipeline can survive hundreds of automated cycles without memory leaks or unhandled geometric failures. \\
+        6 & Analytics & \textbf{Design Space Exploration:} Conduct a baseline random search or Latin-Hypercube Sampling (LHS) study. This will map the design space, validate the boundaries of feasible parameters, and provide baseline data for evaluating optimizer efficiency. \\
+        7 & Optimization & \textbf{Nelder--Mead Implementation:} Test the bounded pure-Python implementation and conduct analytical searches from multiple starts. \\
+        8 & Mid-Project & \textbf{Verification \& Reporting:} Draft the mid-project progress report. Independently verify the optimizer's result by conducting a manual cross-check of the optimized geometry using analytical methods or a secondary FEA package. \\
+        9 & Validation & \textbf{Candidate Validation:} Package aggressive and conservative finalists and perform documented Fusion Static Stress checks. \\
+        10 & Analytics & \textbf{Dashboard Development:} Develop the interactive results dashboard using Streamlit. Integrate real-time plotting of mass convergence, stress constraints, and parameter sensitivity. Ensure robust data parsing from the iteration logger. \\
+        11 & Finalization & \textbf{Stress-Testing \& Code Freeze:} Subject the entire pipeline to rigorous stress-testing under extreme parameter constraints. Finalize the codebase, complete comprehensive inline documentation, and record a flawless final demonstration run. \\
+        12 & Finalization & \textbf{Documentation \& Rehearsals:} Compile all CAD files, FEA reports, engineering drawings, and Python scripts. Finalize the project report, ensuring deep theoretical justification for all observed phenomena. Conduct extensive rehearsals for the final presentation. \\
+        13 & Contingency & \textbf{Buffer \& Submission:} Dedicated contingency buffer week to address any unforeseen software incompatibilities, analytical anomalies, or hardware failures. Final project submission and defense. \\
+\end{longtable}
+
+\vspace{1cm}
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{
+    \begin{ganttchart}[
+        hgrid,
+        vgrid,
+        x unit=1.3cm,
+        y unit title=0.6cm,
+        y unit chart=0.6cm,
+        title label font=\bfseries\footnotesize,
+        bar label font=\footnotesize,
+        group label font=\bfseries\footnotesize,
+        group/.style={draw=blue!60!black, fill=blue!20},
+        group peaks width=0.2,
+        group right shift=0,
+        group left shift=0
+    ]{1}{7}
+    \gantttitle{2026}{4} \gantttitle{2027}{3} \\
+    \gantttitle{Sep}{1} \gantttitle{Oct}{1} \gantttitle{Nov}{1} \gantttitle{Dec}{1} \gantttitle{Jan}{1} \gantttitle{Feb}{1} \gantttitle{Mar}{1} \\
+    
+    \ganttbar[bar/.style={fill=gray!30, draw=gray!80}]{Doc. \& Lit Review}{1}{7} \\
+
+    \ganttgroup{Foundation \& Setup}{1}{2} \\
+    \ganttbar[bar/.style={fill=teal!40, draw=teal!80}]{Component Selection}{1}{1} \\
+    \ganttbar[bar/.style={fill=teal!40, draw=teal!80}]{Parametric Setup}{1}{2} \\
+    
+    \ganttgroup{Integration \& POC}{2}{3} \\
+    \ganttbar[bar/.style={fill=violet!40, draw=violet!80}]{Headless API Control}{2}{2} \\
+    \ganttbar[bar/.style={fill=violet!40, draw=violet!80}]{Proof-of-Concept Loop}{2}{3} \\
+    \ganttbar[bar/.style={fill=violet!40, draw=violet!80}]{Pipeline Logging}{3}{3} \\
+    
+    \ganttgroup{Analytics \& Optimization}{4}{5} \\
+    \ganttbar[bar/.style={fill=olive!40, draw=olive!80}]{Design Space Mapping}{4}{4} \\
+    \ganttbar[bar/.style={fill=olive!40, draw=olive!80}]{Nelder-Mead Impl.}{4}{5} \\
+    \ganttbar[bar/.style={fill=olive!40, draw=olive!80}]{Mid-Project Report}{5}{5} \\
+    \ganttbar[bar/.style={fill=olive!40, draw=olive!80}]{Secondary Optimizer}{5}{5} \\
+    
+    \ganttgroup{Finalization}{6}{7} \\
+    \ganttbar[bar/.style={fill=magenta!40, draw=magenta!80}]{Dashboard Dev.}{6}{6} \\
+    \ganttbar[bar/.style={fill=magenta!40, draw=magenta!80}]{Stress-Testing}{6}{7} \\
+    \ganttbar[bar/.style={fill=magenta!40, draw=magenta!80}]{Buffer \& Submission}{7}{7}
+    \end{ganttchart}
+    }
+    \caption{Gantt chart illustrating the 7-month project schedule from September 2026 to March 2027.}
+    \label{fig:gantt_chart}
+\end{figure}
+\section{Risk Management Strategies}
+Given the complex, multi-disciplinary nature of automating commercial CAD/FEA software via external APIs, significant technical risks exist. A proactive risk management strategy has been developed to mitigate these threats.
+
+\subsection{API Instability and Software Crashes}
+\textbf{Risk:} The CAD software's API may become unstable, memory leak, or crash entirely during extended automated optimization loops encompassing hundreds of iterations.
+\textbf{Mitigation:} Use exception handling, atomic files, timeouts, and persistent run records. If Fusion closes, retain completed records and restart Fusion and the add-in manually before resuming.
+
+\subsection{Geometric Singularities and Topology Failure}
+\textbf{Risk:} The optimizer may request parameter combinations that result in self-intersecting geometry, zero-thickness walls, or topological failures within the CAD model, causing the FEA mesher to fail.
+\textbf{Mitigation:} Define strict, mathematically verified boundary constraints for all parameters before optimization begins. Furthermore, implement "pre-flight" geometric checks within the CAD script. If a geometry fails to build, the API will return a severe penalty value (e.g., artificially infinite mass or stress) to the optimizer, effectively teaching the algorithm to avoid that region of the design space without halting the execution loop.
+
+\subsection{Premature Convergence to Local Minima}
+\textbf{Risk:} Gradient-free optimizers, particularly Nelder-Mead, are susceptible to becoming trapped in local minima within highly non-linear structural design spaces, failing to find the global optimum.
+\textbf{Mitigation:} Use multiple Nelder--Mead starts selected from Latin-hypercube results and report the best design found rather than a guaranteed global optimum.
+
+\section{Resource Allocation}
+Successful execution necessitates optimal allocation of computational and human resources.
+\begin{itemize}
+    \item \textbf{Hardware Resources:} The computationally intensive FEA meshing and solving require a high-performance workstation equipped with a multi-core processor (e.g., Intel Core i9 or AMD Ryzen 9) and substantial RAM (minimum 32GB, preferably 64GB) to prevent memory-bound bottlenecks during extended loops.
+    \item \textbf{Software Resources:} Licenses for the primary CAD/FEA package (e.g., Autodesk Fusion 360, SolidWorks, or ANSYS) must be secured and verified for API access. Open-source Python libraries (SciPy, NumPy, Pandas, Streamlit) will form the computational backbone.
+    \item \textbf{Time Allocation:} Time is partitioned strictly according to the Gantt chart inherently described by the 13-week timeline, with explicit "hard stops" preventing "feature creep" in the Python development phase from derailing the core analytical objectives.
+\end{itemize}
+
+\section{Contingencies}
+Despite comprehensive planning, the project incorporates intrinsic contingency buffers. Week 13 is entirely devoid of scheduled tasks, serving exclusively as a temporal shock absorber for unexpected delays. Should the primary CAD API prove entirely intractable by Week 4, a predetermined fallback plan involves migrating the geometry generation to an open-source, code-driven CAD kernel (e.g., FreeCAD or OpenSCAD) and the FEA to an open-source solver (e.g., CalculiX), ensuring the optimization logic and Python architecture remain viable and the project can still be successfully completed.
+
+\section{Budget}
+While a formal budget section is a standard requirement for this project proposal, the NEMO project is designed to be executed with an absolute minimum of financial overhead. All necessary computational resources, software licenses, and development environments are either already secured via existing academic institutional access (e.g., student licenses) or rely entirely on free, open-source alternatives. Consequently, the actual financial expenditure required to complete this project is zero. The estimated breakdown demonstrating the cost-neutral nature of the project is detailed in Table \ref{tab:budget}.
+
+\begin{table}[H]
+    \centering
+    \caption{Estimated Project Budget (Cost-Neutral Execution)}
+    \label{tab:budget}
+    \begin{tabular}{llr}
+        \toprule
+        \textbf{Category} & \textbf{Item Description} & \textbf{Cost (USD)} \\
+        \midrule
+        Software Licenses & Primary CAD/FEA Package (Academic/Student License) & \$0.00 \\
+         & Python Ecosystem (Open Source) & \$0.00 \\
+        Computational Hardware & Personal High-Performance Workstation (Pre-owned) & \$0.00 \\
+        Documentation & Digital Submissions \& Open-Access Publication & \$0.00 \\
+        Contingency & Extraneous Cloud Compute (AWS Free Tier if needed) & \$0.00 \\
+        \midrule
+        \textbf{Total} & & \textbf{\$0.00} \\
+        \bottomrule
+    \end{tabular}
+\end{table}

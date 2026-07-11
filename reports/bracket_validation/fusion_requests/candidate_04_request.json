@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "part_id": "bracket",
+  "run_id": "fusion_validation",
+  "iteration": 4,
+  "mode": "fusion_cad",
+  "parameters": {
+    "baseplate_length": 105.4769097500957,
+    "baseplate_width": 80.29257011458391,
+    "baseplate_thickness": 4.00900872598096,
+    "rib_height": 32.353647207417104,
+    "rib_thickness": 3.0,
+    "fillet_radius": 9.723235778871745
+  },
+  "artifact_formats": [
+    "step",
+    "boundary_tags"
+  ]
+}

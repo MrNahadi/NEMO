@@ -1,0 +1,34 @@
+\contentsline {section}{Declaration}{i}{Doc-Start}%
+\contentsline {section}{Dedication}{ii}{chapter*.1}%
+\contentsline {section}{Acknowledgements}{iii}{chapter*.2}%
+\contentsline {section}{Abstract}{iv}{chapter*.3}%
+\contentsline {section}{List of Abbreviations and Symbols}{ix}{chapter*.6}%
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Problem Statement}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Objectives}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Scope and Significance}{2}{section.1.3}%
+\contentsline {chapter}{\numberline {2}Literature Review}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Automation in Parametric CAD and FEA}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Gradient-Free Optimization Algorithms in Structural Engineering}{5}{section.2.2}%
+\contentsline {section}{\numberline {2.3}The Nelder-Mead Simplex Method: History and Mathematical Convergence}{6}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Genetic Algorithms vs. Nelder-Mead in Structural Optimization}{7}{section.2.4}%
+\contentsline {section}{\numberline {2.5}Surrogate Modeling in FEA: Bridging the Computational Divide}{8}{section.2.5}%
+\contentsline {section}{\numberline {2.6}Structural Optimization in Marine and Maritime Applications}{9}{section.2.6}%
+\contentsline {section}{\numberline {2.7}Research Gap and Motivation}{11}{section.2.7}%
+\contentsline {chapter}{\numberline {3}Engineering Methodology}{12}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Bracket Definition}{12}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Padeye Definition}{12}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Stabilizer Definition}{13}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Sampling and Optimization}{13}{section.3.4}%
+\contentsline {section}{\numberline {3.5}CAD and Validation Procedure}{13}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Results and Discussion}{14}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Bracket Results}{14}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Engineering Interpretation}{15}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Padeye and Stabilizer Outcomes}{15}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Validation Status}{15}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Conclusions and Recommendations}{16}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Recommendations}{16}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Future Work}{16}{section.5.2}%
+\contentsline {chapter}{\numberline {A}Appendices}{18}{chapter.A}%
+\contentsline {section}{\numberline {A.1}Required Validation Record}{18}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Reproducibility}{18}{section.A.2}%
