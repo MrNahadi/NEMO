@@ -1,86 +1,627 @@
 \chapter{Literature Review}
-\label{ch:literature_review}
+\label{chap:literature}
 
-The pursuit of optimal structural design has been a cornerstone of mechanical and marine engineering for decades, representing an ongoing evolution from empirical craftsmanship to highly formalized computational science. Historically, this design process relied heavily on manual iteration---a workflow where engineers intuitively adjusted design parameters based on rules of thumb, basic analytical calculations, and eventually, manual Finite Element Analysis (FEA) results until a satisfactory, albeit not strictly optimal, solution was found \cite{haftka2012elements}. However, the increasing complexity of modern structural systems, coupled with the pressing global need for material efficiency, drastic cost reduction, and performance maximization under rigorous environmental constraints, have necessitated the adoption of automated, algorithmic approaches to design \cite{farkas2013optimum}. The transition towards such methods marks a departure from finding merely "feasible" designs to mathematically securing "optimal" configurations.
+\section{Chapter Overview}
 
-This chapter comprehensively reviews the theoretical background, historical context, and state-of-the-art developments across several intersecting domains essential to the Nelder-Mead Marine Optimizer (NEMO) project. First, it examines the evolution and automation of parametric Computer-Aided Design (CAD) and FEA, exploring how Application Programming Interfaces (APIs) have revolutionized data exchange. Second, it investigates the application and necessity of gradient-free optimization algorithms within structural engineering, detailing why traditional derivative-based methods falter in noisy design spaces. Third, it provides a deep dive into the history, mathematics, and convergence properties of the Nelder-Mead simplex method, contrasting it with population-based metaheuristics like Genetic Algorithms (GAs). Fourth, the role of surrogate modeling in bridging the computational divide between high-fidelity FEA and optimization is discussed. Finally, it addresses the specific challenges, historical trajectories, and contemporary methodologies characterizing structural optimization within marine and maritime applications. By synthesizing these diverse areas, this literature review identifies the current limitations of conventional workflows and explicitly defines the critical research gap that the NEMO project aims to bridge: the democratization of component-level structural optimization in the maritime industry.
+This chapter reviews the established methods on which \NEMO\ is based. The
+review covers constrained structural optimization, derivative-free search,
+Nelder--Mead, variable scaling, Latin-hypercube sampling, tiered model
+fidelity, CAD--CAE integration, simulation intent, marine structural
+applications, and computational-model credibility. It then relates these
+topics to the bracket, padeye, and stabilizer case studies and defines the
+limited research gap addressed by this project.
 
-\section{Automation in Parametric CAD and FEA}
+\section{Structural Optimization as a Constrained Search}
+\label{sec:structural-optimization}
 
-The integration and automation of parametric CAD and FEA represent a paradigm shift from traditional, serial design workflows to closed-loop, algorithm-driven design spaces. In early computer-aided design, geometric models were essentially static digital drawings; modifying a single dimension required painstakingly redrawing connected elements. The advent of parametric modeling revolutionized this by allowing engineers to define component geometries through associative variable parameters (such as lengths, thicknesses, radii, and angular constraints) rather than rigid, static Cartesian coordinates. When this parametric capability is tightly integrated with an automated FEA pipeline, a change in a single parameter can trigger a cascading, automatic update of the geometry, followed by mesh regeneration, and subsequent structural analysis \cite{lee2005automation}.
+Structural optimization formalizes the selection of design variables to
+improve an objective while satisfying constraints. An objective can represent
+mass, cost, compliance, displacement, stress, fatigue damage, environmental
+impact, or a weighted combination of measures. Constraints can represent
+strength, stiffness, stability, vibration, geometry, fabrication, inspection,
+or regulatory limits. The problem is written in the general form
 
-Recent literature highlights the immense value of this automation in drastically reducing the ``time-to-insight'' for design evaluations. Manual intervention in the geometry cleanup, model idealization, and meshing phases has historically been the most significant and time-consuming bottleneck in the engineering simulation pipeline. According to Song et al. \cite{song2018integration}, the development of robust Application Programming Interfaces (APIs) for commercial CAD software has empowered engineers to bypass graphical user interface (GUI) driven manual interactions entirely. By scripting these processes using languages such as Python, C\#, or C++, a ``closed-loop'' environment is established where CAD geometry generation, FEA evaluation, and algorithmic decision-making communicate seamlessly without human oversight \cite{fusionapi2023}. 
+\begin{align}
+\underset{\mathbf{x}}{\text{minimize}}\quad
+    & f(\mathbf{x}), \label{eq:general-objective}\\
+\text{subject to}\quad
+    & g_j(\mathbf{x})\leq 0,\quad j=1,\ldots,m,\\
+    & h_k(\mathbf{x})=0,\quad k=1,\ldots,p,\\
+    & \mathbf{l}\leq\mathbf{x}\leq\mathbf{u},
+\end{align}
 
-However, achieving true interoperability remains a persistent and significant technical challenge. Transferring geometric data between disparate, standalone CAD and FEA software packages typically relies on neutral file formats like STEP (Standard for the Exchange of Product model data) or IGES. This translation often results in subtle information loss, the generation of sliver faces, or the breaking of associative boundary condition links---phenomena that can abruptly derail automated optimization routines \cite{lee2005automation}. Furthermore, maintaining a ``fit-for-purpose'' analytical model---where parameterized, idealized geometry is reliably updated without causing mesh element inversion, aspect ratio failures, or macroscopic topological violations---is technically demanding. If a parameter change causes a hole to intersect an edge, the resulting topological shift can cause automated meshing scripts to crash.
+where $\mathbf{x}$ is the design vector, $f$ is the objective, $g_j$ and
+$h_k$ are inequality and equality constraints, and $\mathbf{l}$ and
+$\mathbf{u}$ are variable bounds.
 
-To circumvent these issues, modern computational design approaches favor utilizing unified software platforms or highly integrated, native APIs. For example, the Autodesk Fusion 360 Add-Ins API provides a unified environment where both the solid modeling kernel and the simulation solver reside within the same data structure, ensuring that parametric relationships, constraints, and structural boundary conditions remain entirely invariant throughout thousands of iteration cycles \cite{fusionapi2023}. The NEMO project deliberately leverages this integrated architecture to systematically avoid the pitfalls of cross-platform data exchange. By utilizing an embedded Python environment to orchestrate the geometric generation and structural evaluations autonomously, the project ensures a highly robust, fault-tolerant pipeline capable of sustaining continuous algorithmic iteration.
+Structural optimization is commonly divided into size, shape, and topology
+optimization. Size optimization changes dimensions such as thickness and
+section area. Shape optimization changes geometric boundaries while retaining
+a general feature arrangement. Topology optimization changes the distribution
+or connectivity of material inside a design region. These classes can overlap,
+but the distinction helps define what an optimization claim means.
 
-\section{Gradient-Free Optimization Algorithms in Structural Engineering}
+\NEMO\ performs size and bounded parametric shape optimization. The number and
+general arrangement of major features remain fixed. The optimizer changes
+dimensions such as plate thickness, rib height, lug width, spar position, and
+fillet radius. It does not remove arbitrary material or create a new topology.
+This restriction keeps every candidate compatible with an intended load path,
+a native CAD generator, and predefined load and support roles.
 
-Optimization within the realm of structural engineering is inherently mathematically challenging due to the specific nature of the objective functions and constraint boundaries involved. In almost all practical applications, these functions do not exist as neat algebraic equations; rather, they represent the discrete numerical outputs of complex, computationally expensive, ``black-box'' FEA simulations. In such structural scenarios, the relationship between input design variables (e.g., the thickness of a web, the radius of a stress-relieving fillet, the spacing of stiffeners) and the resulting structural responses (e.g., maximum localized von Mises stress, peak structural deflection, fundamental frequency) is highly non-linear, frequently discontinuous, and critically lacks explicit analytical derivatives \cite{wang2019gradient}. 
+The project uses mass as the principal objective. This choice is easy to
+measure and compare, but it does not make mass the only design criterion. A
+low-mass candidate is useful only if its constraints pass and its omitted
+failure modes are later checked. In marine practice, this qualification is
+especially important because cyclic loading, corrosion, fabrication detail,
+and uncertain operational loads can govern a design that passes one static
+yield check.
 
-Gradient-based optimization methods (such as Sequential Quadratic Programming or Interior Point methods), while exceptionally fast and mathematically rigorous, fundamentally require smooth, continuous, and differentiable objective spaces to compute analytical sensitivities (Jacobians and Hessians) \cite{luenberger1984linear}. When exact gradients are completely unavailable, engineers attempt to approximate them numerically using finite difference methods. However, in FEA-driven problems, this numerical approximation is highly susceptible to artificial ``noise'' generated by meshing artifacts. As the geometry slightly changes, the discrete mesh topology shifts, causing microscopic, artificial spikes and dips in the resulting stress calculations. This high-frequency noise entirely confounds gradient-based solvers, causing them to calculate wildly inaccurate descent directions, fail to converge, or become hopelessly trapped in poor local optima \cite{wright1996direct}.
+\section{Derivative-Free Optimization}
+\label{sec:derivative-free}
 
-Consequently, gradient-free (also known as derivative-free or direct search) optimization algorithms have transitioned from being viewed as mathematically unrefined to becoming the absolute standard practice for complex, simulation-based structural problems \cite{conn2009introduction}. As Wright \cite{wright1996direct} chronicles in her seminal review of direct search methods, the realization that engineering functions are inherently noisy and non-differentiable led to a massive resurgence in the popularity and respectability of algorithms that rely solely on evaluating the objective function itself, bypassing the need for gradient estimation entirely.
+Many engineering analyses appear as black-box functions to the optimizer. The
+optimizer supplies dimensions and receives calculated outputs, but it does not
+have exact derivatives of those outputs. CAD regeneration, meshing changes,
+solver tolerances, discrete feature behavior, and failed candidates can also
+make numerical gradients unreliable.
 
-\section{The Nelder-Mead Simplex Method: History and Mathematical Convergence}
+Direct-search and derivative-free methods use objective values without
+requiring analytical gradients. Kolda, Lewis, and Torczon reviewed the
+development of direct-search methods and distinguished methods with formal
+convergence properties from more heuristic searches \cite{kolda2003}. Their
+review shows that derivative-free operation is not the same as assumption-free
+operation. The designer must still scale variables, handle bounds, define
+constraints, select termination criteria, and evaluate sensitivity to the
+starting point.
 
-Among the vast array of derivative-free optimization techniques, the Nelder-Mead (NM) simplex algorithm stands as one of the most historically significant, resilient, and widely utilized direct-search methods. The method was originally published in 1965 by John A. Nelder and Roger Mead \cite{nelder1965simplex}. It was developed as a direct, adaptive improvement upon an earlier ``simplex'' search strategy proposed by William Spendley, George Hext, and Frank Himsworth in 1962 \cite{spendley1962sequential}. While the original Spendley et al. method utilized a rigid, regular simplex that maintained a constant geometric size and shape as it moved through the design space, Nelder and Mead introduced the revolutionary concept of allowing the simplex to dynamically adapt its shape---stretching to accelerate down steep valleys, contracting to navigate narrow corridors, or shrinking to finely pinpoint a local minimum \cite{singer2006nelder}. It is critical to clarify that the Nelder-Mead method is entirely unrelated to George Dantzig's famous ``Simplex Method'' used for solving constrained linear programming problems; Nelder-Mead is explicitly designed for unconstrained (or penalty-constrained) non-linear optimization \cite{conn2009introduction}.
+Derivative-free methods can be attractive when each function evaluation is
+moderately expensive and the number of variables is limited. They are less
+attractive when the dimension is very high or when gradients can be calculated
+cheaply and reliably. The three \NEMO\ cases contain six or nine continuous
+variables. Their analytical evaluations are inexpensive, while the wider
+workflow includes potential discontinuities from geometry checks. This
+combination supports the use of a simple derivative-free method for the
+reference implementation.
 
-The algorithm navigates the mathematical design space using a simplex---a geometric figure consisting of $n+1$ vertices in an $n$-dimensional space (e.g., a triangle in 2D space, a tetrahedron in 3D space). The algorithm begins by evaluating the objective function at each of these initial vertices. It then iteratively attempts to replace the vertex yielding the worst (highest) function value with a new, better point. This is achieved through a sequence of specific geometric transformations:
+\section{The Nelder--Mead Simplex Method}
+\label{sec:nelder-mead-review}
+
+Nelder and Mead introduced the simplex method in 1965 \cite{nelder1965}. In an
+$n$-dimensional space, the method maintains $n+1$ vertices. It evaluates and
+ranks these vertices, calculates the centroid of the better vertices, and
+attempts to replace the worst vertex. The standard trial operations are
+reflection, expansion, contraction, and shrink.
+
+If $\mathbf{x}_h$ is the worst vertex and $\bar{\mathbf{x}}$ is the centroid
+of the remaining vertices, a reflected point is
+
+\begin{equation}
+\mathbf{x}_r=\bar{\mathbf{x}}+
+\alpha(\bar{\mathbf{x}}-\mathbf{x}_h),
+\label{eq:nm-reflection}
+\end{equation}
+
+where $\alpha$ is the reflection coefficient. A sufficiently good reflection
+can lead to expansion:
+
+\begin{equation}
+\mathbf{x}_e=\bar{\mathbf{x}}+
+\gamma(\mathbf{x}_r-\bar{\mathbf{x}}).
+\label{eq:nm-expansion}
+\end{equation}
+
+An unsuccessful reflection can cause contraction toward the centroid. When
+contraction also fails, the simplex shrinks toward its best vertex. The
+standard coefficients used by \NEMO\ are $\alpha=1$, $\gamma=2$, $\rho=0.5$,
+and $\sigma=0.5$.
+
+The method has several practical advantages. It is compact, does not require a
+gradient, and is easy to explain and implement. It also has important limits.
+Lagarias \emph{et al.} established convergence results under restricted
+conditions and discussed cases where the method can approach a non-minimizer
+\cite{lagarias1998}. Nelder--Mead is a local search. Its final design can
+depend on the initial simplex, variable scaling, bounds, penalties, and the
+shape of the objective landscape.
+
+These limitations affect the language of this report. One local run cannot
+support a claim of global optimality. \NEMO\ uses a seeded design-space sample
+and three starts to reduce dependence on the configured baseline. The report
+uses the phrase ``best feasible design found within this parameterized
+search.'' This wording is more defensible than ``global optimum.''
+
+\begin{table}[H]
+\centering
+\caption{Nelder--Mead operations and their purpose in the implemented search}
+\label{tab:nm-operations}
+\begin{tabularx}{\textwidth}{p{0.18\textwidth}p{0.18\textwidth}X}
+\toprule
+\textbf{Operation} & \textbf{Coefficient} & \textbf{Purpose}\\
+\midrule
+Reflection & $\alpha=1$ & Tests a point across the centroid from the current
+worst vertex.\\
+Expansion & $\gamma=2$ & Extends a successful reflected step when it improves
+the best objective.\\
+Contraction & $\rho=0.5$ & Tests a shorter step when reflection does not give
+adequate improvement.\\
+Shrink & $\sigma=0.5$ & Moves all non-best vertices toward the best point after
+failed trial steps.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Variable Scaling, Bounds, and Constraint Penalties}
+\label{sec:scaling-review}
+
+Engineering variables can differ greatly in magnitude and unit. A plate
+thickness may be 4~mm, a chordwise spar position may be 30\%, and a root
+insert length may be 180~mm. If an optimizer works directly in these physical
+coordinates, its simplex geometry and trial step sizes can be dominated by
+the numerically largest variables.
+
+\NEMO\ maps each physical variable $x_i$ to the scaled coordinate
+
+\begin{equation}
+z_i=\frac{x_i-l_i}{u_i-l_i},
+\qquad 0\leq z_i\leq 1,
+\label{eq:variable-scaling}
+\end{equation}
+
+where $l_i$ and $u_i$ are the lower and upper bounds. The evaluator performs
+the inverse mapping before it uses the engineering equations. Trial points are
+clipped at the scaled bounds.
+
+Scaling gives each coordinate the same numerical range. It does not make the
+physics equally sensitive. A small thickness change can alter both mass and
+section properties strongly, while a similar scaled change in a fillet radius
+may affect only one stress factor in the analytical model. Sensitivity remains
+a property of the model.
+
+Nelder--Mead does not directly enforce general nonlinear constraints in this
+implementation. \NEMO\ therefore uses a penalty objective. If
+$m(\mathbf{x})$ is mass, $F(\mathbf{x})$ is factor of safety,
+$F_{\min}$ is the minimum factor of safety, $\delta(\mathbf{x})$ is
+displacement, and $\delta_{\max}$ is the displacement limit, the objective is
+
+\begin{equation}
+\begin{split}
+J(\mathbf{x})=m(\mathbf{x})+w\Bigg[
+&\left(
+\frac{\max(0,F_{\min}-F(\mathbf{x}))}{F_{\min}}
+\right)^2\\
+&+\left(
+\frac{\max(0,\delta(\mathbf{x})-\delta_{\max})}
+{\delta_{\max}}
+\right)^2
+\Bigg],
+\end{split}
+\label{eq:penalty-objective}
+\end{equation}
+
+with $w=100$ for the current parts.
+
+A feasible design has $J=m$. An infeasible design has a higher objective
+according to its normalized violations. Penalties simplify the search, but
+their weight affects ranking. A weak penalty can make an infeasible light
+design more attractive than a feasible heavier design. A large penalty can
+create a steep landscape near the boundary. The final selection must therefore
+filter explicitly for feasibility. The stabilizer case in
+Chapter~\ref{chap:results} demonstrates why this check is necessary.
+
+\section{Latin-Hypercube Sampling}
+\label{sec:lhs-review}
+
+McKay, Beckman, and Conover introduced Latin-hypercube sampling as a stratified
+method for computer experiments \cite{mckay1979}. For each variable, an
+$N$-point Latin hypercube samples once from each of $N$ equal-probability
+intervals. Independent permutations combine the one-dimensional samples into
+$N$ multi-dimensional points.
+
+Compared with an unstructured random sample of the same size, a Latin
+hypercube improves one-dimensional stratification. It does not guarantee dense
+coverage of every interaction, especially in high dimensions. Sixty points
+remain sparse in a nine-dimensional space. The method is therefore best
+viewed here as an economical exploration step.
+
+\NEMO\ uses 60 samples per part with seed 42. The fixed seed makes the
+campaign repeatable. Sampling serves three purposes:
+
 \begin{enumerate}
-    \item \textbf{Reflection:} The worst point is reflected across the centroid of the remaining points, projecting it into a potentially better region of the design space.
-    \item \textbf{Expansion:} If the reflected point is highly successful (better than the current best point), the algorithm expands the simplex further in that direction, accelerating the search.
-    \item \textbf{Contraction:} If the reflection fails to yield a better point, the algorithm assumes it has overstepped a valley and contracts the simplex inwards, probing closer to the centroid.
-    \item \textbf{Shrinkage:} If all else fails, the entire simplex shrinks uniformly towards the best known vertex, effectively reducing the step size to finely resolve the local topology.
+    \item it checks whether calculated outputs change in a physically sensible
+    direction over the bounds;
+    \item it identifies low-mass feasible candidates that can start local
+    search; and
+    \item it reduces reliance on one baseline-start Nelder--Mead run.
 \end{enumerate}
 
-The primary advantage of the Nelder-Mead algorithm is its absolute indifference to gradient information and its remarkable robustness in the face of the numerical noise typical of FEA outputs. Kaveh and Ghazaan \cite{kaveh2017optimal} demonstrated the profound efficacy of the Nelder-Mead algorithm in continuous structural design, noting its inherent simplicity, robustness against discontinuities, and ease of algorithmic implementation. 
+Sampling also provides diagnostic evidence. A high failure rate can reveal
+poor parameter bounds or a fragile geometry generator. An unexpectedly high
+feasibility rate can reveal an over-conservative baseline or a screening model
+that does not activate the declared constraints.
 
-However, the mathematical convergence properties of the Nelder-Mead method have been a subject of intense academic scrutiny. Despite its immense practical success, it lacks the strong theoretical convergence guarantees found in gradient-based methods \cite{bartz2020benchmarking}. Lagarias et al. \cite{lagarias1998convergence} conducted a rigorous analysis of the method's convergence properties, proving convergence for strictly convex functions in 1D and 2D spaces, but noting that in higher dimensions, the algorithm can, under highly specific adversarial conditions, stall and converge to a non-stationary point that is not a true local minimum. Furthermore, as a strictly local search method, Nelder-Mead is fundamentally vulnerable to becoming trapped in local minima if the initial starting simplex is situated in a poor region of a highly multimodal landscape. Despite these theoretical limitations, its empirical performance on smooth, low-dimensional engineering problems remains unparalleled, making it highly attractive for specific classes of structural refinement \cite{singer2006nelder}.
+\section{Tiered Model Fidelity}
+\label{sec:fidelity-review}
 
-\section{Genetic Algorithms vs. Nelder-Mead in Structural Optimization}
+Engineering optimization often combines models with different cost and
+accuracy. Peherstorfer, Willcox, and Gunzburger review multi-fidelity methods
+that combine inexpensive low-fidelity models with expensive high-fidelity
+models \cite{peherstorfer2018}. Formal multi-fidelity optimization uses the
+high-fidelity model inside the optimization strategy to improve prediction,
+selection, or convergence.
 
-In the contemporary landscape of structural optimization, the comparison between population-based metaheuristics, most notably Genetic Algorithms (GAs), and local direct-search methods like Nelder-Mead is characterized by a fundamental trade-off between global exploration and local exploitation \cite{hassan2005comparison}. 
+\NEMO\ does not yet implement such a closed loop. The analytical model guides
+the search. Native CAD verifies geometry and mass for selected designs. Manual
+FEA follows as a separate validation stage. The correct description is a
+\emph{tiered-fidelity workflow}. The analytical optimum is not automatically
+corrected by FEA.
 
-Genetic Algorithms, such as the highly influential Non-dominated Sorting Genetic Algorithm II (NSGA-II) \cite{deb2002fast}, are inspired by the principles of Darwinian natural selection. They operate by maintaining a large ``population'' of candidate designs. Through iterative cycles of evaluating fitness, selecting the best performers, and applying biologically inspired operators like "crossover" (recombination of traits) and "mutation" (random perturbations), GAs comprehensively explore vast, complex, and highly multimodal design spaces. They are exceptionally robust, easily handle discrete variables (like standardized plate thicknesses), and are highly effective at avoiding local optima to locate the global optimum region.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=0.75cm,
+    every node/.style={font=\small},
+    stage/.style={
+        rectangle,
+        rounded corners,
+        draw=nemoblue,
+        fill=nemolight,
+        thick,
+        minimum width=0.83\textwidth,
+        minimum height=1.25cm,
+        align=center
+    }
+]
+\node[stage] (a) {\textbf{Tier 1: Analytical screening}\\
+Low cost; many candidates; first-order mass, stress, FOS, and displacement};
+\node[stage,below=of a] (b) {\textbf{Tier 2: Native CAD verification}\\
+Selected candidates; solid validity, physical mass, exports, and boundary roles};
+\node[stage,below=of b] (c) {\textbf{Tier 3: Manual FEA verification}\\
+Few candidates; checked material, loads, supports, mesh, reactions, and results};
+\node[stage,below=of c] (d) {\textbf{Tier 4: Design qualification}\\
+Codes, detailed failure modes, uncertainty, physical tests, and engineering approval};
+\draw[arrow] (a) -- (b);
+\draw[arrow] (b) -- (c);
+\draw[arrow] (c) -- (d);
+\end{tikzpicture}
+\caption{Tiered evidence model used by the project}
+\label{fig:tiered-evidence}
+\end{figure}
 
-However, the defining limitation of Genetic Algorithms in the context of FEA-driven structural optimization is their abysmal sample efficiency. Because they rely on statistical populations and randomized exploration, GAs typically require hundreds, if not thousands, or tens of thousands of individual function evaluations to achieve convergence \cite{wang2019gradient}. When each evaluation involves a computationally expensive 3D meshing and finite element solve---taking minutes or hours---the computational cost of deploying a GA becomes entirely prohibitive for routine engineering tasks without access to massive high-performance computing (HPC) clusters. Furthermore, GAs are notoriously slow at "fine-tuning"; once they have identified the general valley containing the global optimum, their randomized nature makes pinpointing the exact mathematical minimum highly inefficient \cite{hassan2005comparison}.
+The distinction between the tiers protects the report from a common error:
+treating agreement on one quantity as complete validation. Close agreement
+between analytical and CAD mass shows that the volume approximations represent
+the generated geometry reasonably well. It does not show that the analytical
+stress model represents local three-dimensional stress.
 
-Conversely, the Nelder-Mead method acts as a highly aggressive, deterministic local search. It is engineered for rapid exploitation. It requires significantly fewer function evaluations to "slide down" a valley and locate a precise minimum, making it vastly more sample-efficient than any population-based method \cite{kaveh2017optimal}. The cost of this speed is the loss of global awareness; Nelder-Mead will reliably find the bottom of the valley it starts in, but it cannot know if a deeper valley exists elsewhere in the design space.
+\section{CAD--CAE Integration}
+\label{sec:cad-cae-review}
 
-In advanced aerospace and automotive research, the prevailing state-of-the-art favors utilizing hybrid algorithms that combine the strengths of both \cite{wang2019gradient}. A GA is deployed initially to explore the space and identify promising "basins of attraction," after which the Nelder-Mead algorithm is seeded in these basins to rapidly exploit and converge on the exact optimum. However, for the NEMO project---which specifically targets localized, secondary marine components (such as brackets and stiffeners) rather than entire hull forms---the design spaces are typically low-dimensional (e.g., 2 to 6 continuous variables) and generally unimodal (or possess local optima that are sufficiently "good" for engineering purposes). In this highly specific context, where computational economy on a standard engineering workstation is paramount, the deterministic speed and high sample efficiency of the Nelder-Mead method present a definitively superior primary optimization strategy over computationally exorbitant GAs.
+Automated structural optimization requires dependable communication between
+geometry, analysis, and optimization. Park and Dang coupled commercial CAD and
+CAE software through scripting, programming interfaces, and metamodels
+\cite{park2010}. Their work shows how integration can reduce repetitive work
+and analysis cost. It also introduces an additional source of error when a
+surrogate model approximates the high-fidelity response.
 
-\section{Surrogate Modeling in FEA: Bridging the Computational Divide}
+Li \emph{et al.} developed a unified parametric representation based on
+extended voxels. Their method supports a closed loop among design, simulation,
+and optimization while carrying design and simulation meaning
+\cite{li2023}. This work confirms that automated CAD--CAE optimization is an
+established research area. \NEMO\ does not claim novelty from automation
+alone.
 
-As the ambition of structural optimization has grown, so too has the computational burden of high-fidelity FEA. When a single simulation of a complex assembly or non-linear crash analysis takes days to compute, even sample-efficient algorithms like Nelder-Mead become impractical \cite{forrester2008engineering}. To bridge this computational divide, researchers and engineers heavily employ Surrogate Modeling---also known as metamodeling or response surface construction \cite{simpson2001metamodels}.
+The project instead uses a modest file-based architecture. External Python
+handles engineering definitions, optimization, run records, and validation
+packages. Fusion handles native CAD and physical properties. Versioned JSON
+files connect the two environments. This approach is slower than an in-process
+call but has useful properties:
 
-Surrogate models act as mathematically cheap, "black-box" analytical approximations of the expensive FEA solver. The standard workflow involves defining a Design of Experiments (DOE)---such as a Latin Hypercube Sampling \cite{mckay1979comparison}---to intelligently select a limited number of training points across the multidimensional design space. The expensive FEA solver is run only at these specific points. Using the resulting input-output data pairs, regression or interpolation techniques are utilized to construct an analytical mathematical surface that mimics the FEA behavior \cite{jin2001comparative}.
+\begin{itemize}
+    \item a request and response can be inspected with an ordinary text editor;
+    \item the Fusion environment does not need third-party optimization
+    packages;
+    \item a failed request can preserve a controlled error record;
+    \item the protocol can retain compatibility with the original bracket
+    proof of concept; and
+    \item the same external application can later support another CAD or FEA
+    backend.
+\end{itemize}
 
-Two of the most prominent surrogate techniques in structural engineering are Response Surface Methodology (RSM) and Kriging (Gaussian Process Regression). Traditional RSM typically utilizes low-order (often quadratic) polynomials to formulate a global approximation of the design space using least-squares regression. It is computationally trivial to construct and evaluate, making it excellent for identifying broad, global trends in relatively smooth, low-dimensional spaces \cite{simpson2001metamodels}. However, RSM generally fails to accurately capture highly complex, multi-modal, or highly non-linear structural behaviors. 
+The architecture also has limits. A single shared request directory serializes
+CAD work. Polling adds latency. Local file locking requires retry behavior.
+The bridge cannot make an unavailable solver API available. These are accepted
+trade-offs for an inspectable student-scale implementation.
 
-Kriging, originally developed in geostatistics, has emerged as the premier surrogate modeling technique for advanced structural optimization \cite{forrester2008engineering}. Kriging provides a highly flexible, spatial statistics-based approach that combines a global polynomial model with a localized deviation function (a Gaussian process). This allows Kriging to act as an exact interpolator that precisely passes through the sampled FEA data points while robustly estimating the uncertainty and non-linear behavior in the unexplored regions between them \cite{jin2001comparative}. 
+\section{Simulation Intent and Semantic Boundary Roles}
+\label{sec:simulation-intent}
 
-When integrated into an optimization loop, surrogate models offer profound benefits. First, they dramatically accelerate the optimization process, as the algorithm (whether GA or NM) interrogates the instantaneous mathematical surrogate rather than invoking the slow FEA solver. Second, regression-based surrogates inherently "smooth out" the high-frequency numerical noise associated with FEA meshing artifacts, providing a clean, differentiable surface that allows even gradient-based optimizers to function effectively \cite{forrester2008engineering}. Finally, the explicit mathematical nature of the surrogate allows engineers to rapidly perform sensitivity analyses, instantaneously visualizing how structural performance varies with design changes.
+Geometry changes can invalidate an analysis even when the regenerated solid
+looks correct. A load attached to a low-level face identifier can disappear or
+move after a feature changes the boundary representation. A reliable
+parametric workflow must preserve why a region exists and how it is used.
 
-While surrogate modeling is absolutely essential for large-scale, system-level maritime optimization (e.g., full-ship dynamic load analysis), the NEMO project explicitly focuses on component-level optimization where individual linear-static FEA solves can be executed in a matter of seconds. Consequently, NEMO opts for direct algorithmic evaluation, eliminating the complexity and potential approximation errors of constructing surrogate models, while acknowledging their critical role in broader maritime optimization contexts.
+Nolan \emph{et al.} define simulation intent as the high-level modeling and
+idealization decisions required for fit-for-purpose analysis
+\cite{nolan2015}. Their work associates analysis meaning with regions and
+interfaces rather than relying only on unstable topology.
 
-\section{Structural Optimization in Marine and Maritime Applications}
+\NEMO\ applies the same principle in a smaller implementation. The bracket
+declares \code{fixed\_support} and \code{equipment\_load}. The padeye declares
+\code{fixed\_support} and \code{pin\_bearing}. The stabilizer declares
+\code{fixed\_support}, four pressure bands, and \code{tip\_monitor}. The
+Fusion generator selects faces with part-specific geometric rules and records
+area, centroid, normal, bounding box, and cylinder data where available.
 
-The maritime industry presents uniquely severe structural challenges characterized by profoundly harsh operational environments, highly dynamic and unpredictable loading conditions (wave slamming, torsional hull flexing, cargo inertia), and an incredibly strict, conservative regulatory framework enforced by classification societies \cite{cui2020marine}. The historical evolution of marine structural design reflects a slow, cautious transition from reliance on empirical, craftsmanship-based shipwright rules to the adoption of advanced, computationally intensive, multi-objective design frameworks \cite{parnaudeau2015scantling}.
+Semantic roles improve traceability, but they do not remove the need for human
+inspection. A broad geometric selector can match an unintended face. A
+topology change can divide one intended region into several faces. The manual
+FEA procedure must display and confirm every selected face before solving.
 
-Traditionally, marine structures---from the massive primary longitudinal hull girders down to the smallest secondary auxiliary outfitting brackets---have been systematically over-designed. Driven by the overriding priority of absolute reliability at sea, engineers historically employed massive safety margins to compensate for the inherent uncertainties in dynamic oceanic loads and material fatigue degradation over a 25-year lifespan \cite{farkas2013optimum}. However, modern economic and environmental realities have radically shifted the industry's priorities. The primary objective of contemporary marine structural optimization is to relentlessly minimize steel weight, known as lightweight tonnage (LWT). Reducing LWT directly correlates to massive reductions in initial material procurement costs, an increase in profitable cargo deadweight capacity, lowered vessel displacement, drastically improved hydrodynamic fuel efficiency, and critical reductions in greenhouse gas (GHG) emissions \cite{cui2020marine}. The implementation of the International Maritime Organization's (IMO) Energy Efficiency Design Index (EEDI) has transformed structural lightweighting from an economic desire into a strict regulatory mandate.
+\section{Marine Structural Optimization}
+\label{sec:marine-optimization-review}
 
-Cui and Zhang \cite{cui2020marine} highlight that Simulation-Based Design Optimization (SBDO) is increasingly utilized across the marine sector to systematically strip away this historical excess mass. By establishing formal mathematical constraints based on yield strength criteria, buckling resistance, and high-cycle fatigue life under extreme load cases, optimization algorithms can safely iteratively remove unnecessary material from non-critical load paths without compromising the vessel's structural integrity or violating classification society rules. 
+Marine structural optimization must represent realistic loads, supports, and
+failure modes. Gentils, Wang, and Kolios optimized an offshore wind support
+structure with parametric FEA and a genetic algorithm
+\cite{gentils2017}. Their constraints included stress, displacement,
+vibration, buckling, and fatigue. The study reported a 19.8\% mass reduction
+for the complete support structure.
 
-Current marine optimization literature predominantly categorizes efforts into three methodologies. First, Scantling Optimization focuses on the iterative adjustment of plate thicknesses and standard stiffener profiles (e.g., bulb flats) to meet classification rules with minimum mass \cite{parnaudeau2015scantling}. Second, Shape Optimization adjusts the geometric boundaries of components, such as optimizing the curvature of a bracket edge to reduce stress concentrations. Third, Topology Optimization radically redistributes material within a given design domain to create highly organic, weight-efficient internal structures, although these often face severe manufacturability challenges in traditional shipyards.
+Zheng, Li, and Xiao later used sensitivity analysis, surrogate models, and a
+genetic algorithm for jacket structures \cite{zheng2023}. Their method
+addressed natural frequency, displacement, stress, buckling, and later fatigue
+checks. Wang, Mantey, and Zhang developed a fast parametric FEA and
+genetic-algorithm tool for jacket structures \cite{wang2024}. These studies
+show that marine structural optimization commonly requires several load cases
+and constraints beyond static yield.
 
-Despite the proliferation of sophisticated optimization techniques at the global ship-design level---such as holistic hull form optimization using Computational Fluid Dynamics (CFD) to minimize wave-making resistance, or midship section scantling optimization to maximize longitudinal bending strength---the optimization of secondary structural components and outfitting remains stubbornly manual and archaic. These localized components, such as piping supports, equipment foundations, and mounting brackets, exist in the hundreds or thousands aboard a typical commercial vessel. While the theoretical mass saving on a single bracket may appear entirely negligible (perhaps a few kilograms), the aggregate weight reduction across a ship's entire massive outfitting inventory represents a highly substantial and entirely unexploited opportunity for efficiency gains \cite{cui2020marine}. Furthermore, these localized components, governed by clear, isolated boundary conditions, are exceptionally amenable to parameterization and rapid automated structural analysis.
+The literature provides two lessons for \NEMO. First, mass reduction must
+remain subordinate to the governing engineering constraints. Second, the
+selected design can change when supports and loads change. The project
+therefore treats its load cases as declared engineering envelopes, not as
+complete vessel or offshore design cases.
 
-\section{Research Gap and Motivation}
+\begin{table}[H]
+\centering
+\caption{Relationship between selected literature and the NEMO implementation}
+\label{tab:literature-comparison}
+\begin{tabularx}{\textwidth}{p{0.23\textwidth}XX}
+\toprule
+\textbf{Source area} & \textbf{Established lesson} & \textbf{Use in NEMO}\\
+\midrule
+Direct search \cite{kolda2003,nelder1965,lagarias1998} &
+Derivative-free local search is useful but needs scaling, stopping rules, and
+careful claims. &
+Scaled bounded variables, three starts, and ``best design found'' wording.\\
 
-A critical and exhaustive review of the existing literature reveals a profound and distinct gap between the theoretical, highly developed capabilities of automated structural optimization and its practical, day-to-day application to secondary marine structures using accessible engineering tools. While the advanced mathematical theory of derivative-free optimization \cite{conn2009introduction, kaveh2017optimal} and the architectural frameworks for parametric CAD/FEA API integration \cite{song2018integration, lee2005automation} are incredibly well-established in academic literature, these powerful domains are remarkably rarely synthesized into lightweight, deployable, and user-friendly pipelines suitable for everyday shipyard engineering components.
+Computer experiments \cite{mckay1979} &
+Stratified samples improve economical exploration. &
+Sixty seeded Latin-hypercube samples per part.\\
 
-The prevailing state-of-the-art in maritime research predominantly focuses either on massive, global ship structures using highly specialized, exceptionally expensive, and notoriously difficult-to-learn enterprise maritime software suites, or alternatively, on the purely abstract mathematical benchmarking of novel algorithms without a tangible physical CAD/FEA loop attached \cite{bartz2020benchmarking}. Consequently, a heavy reliance on manual, intuition-driven trial-and-error iteration violently persists in localized marine component design. The establishment of an automated optimization pipeline is widely perceived by practicing shipyard engineers as too programmatically complex, computationally exorbitant, or software-prohibitive for routine use on "minor" components.
+Multi-fidelity methods \cite{peherstorfer2018} &
+Models of different cost require a defined relationship. &
+Tiered analytical, CAD, manual FEA, and qualification evidence.\\
 
-NEMO addresses this gap through analytical screening, bounded Nelder--Mead search, automated Fusion geometry generation, and documented manual FEA validation. Its file-based handshake preserves traceable requests and responses while separating the optimizer from Fusion's embedded environment. The study evaluates reliable partial automation while retaining engineering review where the current API does not support dependable solver control or result extraction.
+CAD--CAE integration \cite{park2010,li2023} &
+Automation must preserve data and analysis meaning. &
+Versioned JSON bridge, native CAD, and explicit partial responses.\\
+
+Simulation intent \cite{nolan2015} &
+Boundary meaning must survive geometry change. &
+Semantic roles and geometric face signatures.\\
+
+Marine optimization \cite{gentils2017,zheng2023,wang2024} &
+Mass is one objective among strength, stiffness, stability, dynamics, and
+fatigue. &
+Static screening followed by a stated list of required detailed checks.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Bracket Structural Behavior}
+\label{sec:bracket-review}
+
+Autodesk lists brackets among components suited to linear Static Stress
+analysis when the assumptions of small deformation, unchanged load direction,
+and linear elastic material behavior hold \cite{autodeskStaticStress}. The
+apparent simplicity of a bracket can be misleading. Local stress depends on
+load introduction, fastener restraint, contact, rib geometry, fillet radius,
+plate flexibility, and weld detail.
+
+The \NEMO\ bracket is an equipment-foundation archetype with a baseplate, four
+mounting holes, two ribs, and rib-root fillets. Its analytical model uses an
+equivalent cantilever relation. This model captures the broad effects of
+section depth, plate thickness, rib thickness, and load eccentricity. It does
+not resolve bolt bearing, fastener preload, prying, weld-toe stress, local
+contact, or three-dimensional restraint.
+
+The bracket is useful as a proof of concept because the geometry is easy to
+recognize and the load path is easy to explain. It is not useful because it is
+free from modeling risk. The proof-of-concept FEA report later showed that a
+three-order-of-magnitude input error can survive through a completed solver
+run. This finding supports a workflow that checks input values and reaction
+balance before it discusses result contours.
+
+\section{Padeyes and Pinned Connections}
+\label{sec:padeye-review}
+
+Padeyes transfer lifting force through a pin hole into a lug, reinforcement,
+welds, and supporting structure. Potential governing effects include
+pin-bearing stress, net-section tension, shear-out, bending, local contact,
+lug-root stress, gusset load transfer, and weld stress. Clearance, load angle,
+out-of-plane load, and local geometry can strongly affect the stress field.
+
+Soh and Soh compared simplified two-dimensional padeye models with a
+three-dimensional finite-element solution \cite{soh1989}. Their work showed
+that model selection affects stress prediction and can lead to conservative
+overdesign. Liu, Zhou, and Tan used FEA to study padeye stress and deformation
+and then formulated an optimization problem to reduce steel use
+\cite{liu2013}. These studies support the use of a simplified model for early
+screening, provided later FEA represents the important three-dimensional
+behavior.
+
+Pedersen examined the stress concentration around a pin-loaded hole and
+showed the influence of contact modeling and local geometric refinement
+\cite{pedersen2019}. This result is directly relevant to the \NEMO\ padeye.
+Its current analytical model compares several nominal stress modes, but it
+does not model a separate pin, clearance, nonlinear contact, or a weld group.
+A later FEA campaign must decide whether a distributed bearing load is
+adequate for screening or whether explicit pin contact is required.
+
+Marine lifting appliances also require a governing rule set. DNV-ST-N001
+addresses marine operations and associated structural considerations
+\cite{dnvN001}. Lloyd's Register publishes a Code for Lifting Appliances in a
+Marine Environment that covers design, materials, fabrication, testing,
+marking, survey, and documentation \cite{lrLifting2026}. \NEMO\ does not
+claim compliance with either source. They are cited to show the wider
+qualification work that lies beyond a single yield-based optimization.
+
+\section{Stabilizer Fins and Prescribed Hydrodynamic Loads}
+\label{sec:stabilizer-review}
+
+The stabilizer differs from the bracket and padeye because its load is
+distributed over an external lifting surface. The project retains a NACA 0015
+section. Abbott, von Doenhoff, and Stivers documented NACA airfoil families
+and aerodynamic data in NACA Report 824 \cite{abbott1945}. The use of a known
+profile makes the geometric definition reproducible, but it does not supply a
+complete marine pressure field.
+
+The \NEMO\ stabilizer keeps its span, root chord, tip chord, sweep, trailing
+edge, root flange, and rib stations fixed. It changes skin thickness, two spar
+positions, two spar thicknesses, rib thickness, root-insert dimensions, and
+root fillet radius. Its prescribed resultant is calculated from a simplified
+lift expression and distributed through four spanwise weights.
+
+This setup supports internal structural sizing under one declared load
+envelope. It does not optimize hydrodynamic efficiency. It omits vessel
+motions, unsteady flow, free-surface effects, ventilation, cavitation,
+actuator behavior, pressure reversal, impact, and fluid--structure
+interaction. A later design stage must derive the pressure from an accepted
+hydrodynamic method, CFD, model testing, or full-scale data.
+
+\section{Linear Static Finite Element Analysis}
+\label{sec:linear-static-fea-review}
+
+Autodesk describes a Static Stress study as appropriate when deformation is
+small, load direction does not change significantly, material properties are
+constant, and the response remains linear elastic
+\cite{autodeskStaticStress}. A complete setup requires geometry, materials,
+constraints, loads, contacts, mesh, solution, and result review
+\cite{autodeskStaticSetup}.
+
+These requirements are coupled. A correct material with a wrong load gives a
+wrong result. A correct load on the wrong face can change the load path. An
+overly rigid support can reduce deformation and create a local stress
+singularity. A coarse mesh can underpredict a local stress. A maximum contour
+value can occur at a mathematical singularity that is unsuitable for direct
+acceptance.
+
+Reaction forces provide a basic equilibrium check. Autodesk notes that support
+reactions should oppose the total applied load \cite{autodeskReaction}. For
+the bracket, a correctly configured 1472~N downward load should produce a
+vertical support reaction close to 1472~N, subject to sign convention and
+small numerical differences. A reaction near 1.472~N would immediately expose
+the factor-of-one-thousand load error.
+
+Mesh convergence is also necessary. Autodesk explains that coarse meshes
+commonly underpredict stress and that stress is more mesh-sensitive than
+displacement \cite{autodeskMesh}. Comparison should use the same geometric
+location across refinements. A credible record should report the global mesh,
+local refinements, element order, node and element count, the monitored
+quantity, and the change between successive meshes.
+
+\section{Verification, Validation, and Model Credibility}
+\label{sec:vv-review}
+
+Verification asks whether equations and software were solved or implemented
+correctly. Validation asks whether the model represents the real system well
+enough for its intended use. These questions are related but distinct. A
+correctly implemented simplified model can still be unsuitable for a service
+decision.
+
+ASME V\&V 10 provides a framework and terminology for verification,
+validation, and uncertainty quantification in computational solid mechanics
+\cite{asmeVV10}. NASA-STD-7009B emphasizes intended use, acceptance criteria,
+input pedigree, uncertainty, sensitivity, verification, validation, and
+communicated credibility \cite{nasa7009}. The principles are relevant to
+\NEMO\ even though the project does not fall under NASA governance. Model
+credibility depends on the decision being supported.
+
+\begin{table}[H]
+\centering
+\caption{Evidence levels and the questions they answer}
+\label{tab:evidence-questions}
+\begin{tabularx}{\textwidth}{p{0.20\textwidth}XX}
+\toprule
+\textbf{Evidence level} & \textbf{Primary question} & \textbf{Representative
+checks}\\
+\midrule
+Software verification &
+Did the code implement its declared contracts and calculations consistently? &
+Unit tests, bounds, baseline feasibility, failure handling, logging schema,
+repeatable seeds.\\
+
+CAD verification &
+Did the requested dimensions create a usable native solid and required
+artifacts? &
+One connected solid, positive volume, STEP export, boundary roles, physical
+mass.\\
+
+FEA verification &
+Was the numerical study configured and solved correctly? &
+Material, load, support, contact, reaction balance, mesh convergence, result
+location.\\
+
+Physical validation &
+Does the model represent measured component behavior adequately for its
+intended use? &
+Proof load, strain, displacement, failure mode, repeatability, uncertainty.\\
+
+Design qualification &
+Does the complete design satisfy governing service requirements? &
+Design codes, load combinations, fatigue, buckling, corrosion, fabrication,
+inspection, competent approval.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The table shows why a project can complete software and CAD verification
+without completing structural validation. It also explains why a single FEA
+contour is not final proof. The bracket report is retained because it documents
+the setup and exposes a process weakness. Its incorrect numerical result is
+not promoted to a higher evidence level.
+
+\section{Literature Synthesis and Research Gap}
+\label{sec:literature-synthesis}
+
+The literature establishes every main method used by \NEMO. Nelder--Mead
+provides a compact derivative-free local search
+\cite{nelder1965,lagarias1998}. Direct-search literature explains the need for
+careful implementation and claims \cite{kolda2003}. Latin-hypercube sampling
+provides a repeatable exploration stage \cite{mckay1979}. Multi-fidelity
+literature explains the value and limits of combining models of different
+cost \cite{peherstorfer2018}. CAD--CAE research identifies integration and
+simulation intent as central problems \cite{park2010,nolan2015,li2023}.
+Marine optimization studies show that useful lightweighting depends on
+several constraints and credible load models
+\cite{gentils2017,zheng2023,wang2024}. Computational-mechanics guidance
+requires a declared intended use and an evidence chain
+\cite{asmeVV10,nasa7009}.
+
+No single method in \NEMO\ is new. The reviewed literature also contains more
+advanced automated loops, global optimizers, surrogate models, and
+high-fidelity marine applications. The project therefore does not claim to be
+the first marine optimizer or the first CAD--CAE automation system.
+
+The limited gap addressed here is practical integration at student-project
+scale. The reviewed sources do not directly provide a transparent,
+part-manifest-driven workflow that combines unit-aware definitions,
+first-order screening, seeded sampling, scaled bounded multi-start search,
+failure-contained evaluation, versioned atomic file exchange, native Fusion
+CAD, semantic boundary metadata, validation packages, and explicit separation
+of analytical, CAD, and FEA evidence across a bracket, padeye, and stabilizer.
+
+\NEMO\ addresses that implementation gap as an auditable reference workflow.
+Its value lies in exposing each assumption and handoff, reducing repetitive
+candidate work, and preserving enough evidence for a supervisor or engineer to
+check the result. The next chapter describes how the workflow was implemented
+and evaluated.

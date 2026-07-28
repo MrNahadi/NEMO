@@ -1,0 +1,407 @@
+\chapter{Reproduction and Validation Material}
+\label{chap:appendices}
+
+\section{Fresh-Start Command-Prompt Procedure}
+\label{app:fresh-start}
+
+The following procedure uses Windows Command Prompt. It does not require
+PowerShell.
+
+\begin{enumerate}
+    \item Open Command Prompt.
+    \item Change to the repository:
+\begin{lstlisting}[language={},caption={Open the NEMO repository}]
+cd /d C:\Users\muigu\Documents\Projects\NEMO
+\end{lstlisting}
+    \item Create or update the project environment:
+\begin{lstlisting}[language={},caption={Set up the project}]
+build.bat setup
+\end{lstlisting}
+    \item Run the offline checks:
+\begin{lstlisting}[language={},caption={Run offline verification}]
+build.bat check
+\end{lstlisting}
+    \item List the registered parts:
+\begin{lstlisting}[language={},caption={List the registered components}]
+.venv\Scripts\nemo.exe parts
+\end{lstlisting}
+    \item Evaluate the three baselines:
+\begin{lstlisting}[language={},caption={Evaluate the analytical baselines}]
+.venv\Scripts\nemo.exe evaluate --part bracket
+.venv\Scripts\nemo.exe evaluate --part padeye
+.venv\Scripts\nemo.exe evaluate --part stabilizer
+\end{lstlisting}
+\end{enumerate}
+
+\section{Bracket Proof-of-Concept Procedure}
+\label{app:bracket-poc}
+
+\begin{enumerate}
+    \item Start Autodesk Fusion.
+    \item Open \emph{Utilities}, then \emph{Scripts and Add-Ins}.
+    \item Select and start NEMOBridge.
+    \item If a bracket opens automatically, leave it available. NEMOBridge can
+    load or create the demonstration design during startup.
+    \item Open Command Prompt and change to the repository.
+    \item Run:
+\begin{lstlisting}[language={},caption={Run the preserved bracket proof of concept}]
+cd /d C:\Users\muigu\Documents\Projects\NEMO
+.venv\Scripts\python.exe demos\bracket-proof-of-concept\manual_fusion_handshake.py
+\end{lstlisting}
+    \item Return to Fusion and inspect the regenerated bracket.
+    \item For the complete manual study, follow
+    Section~\ref{sec:bracket-poc-method}.
+\end{enumerate}
+
+\section{Schema-Version-2 Request Example}
+\label{app:schema-request}
+
+\begin{lstlisting}[language=Python,caption={Illustrative bracket CAD request},
+label={lst:request-example}]
+{
+  "schema_version": 2,
+  "part_id": "bracket",
+  "run_id": "demo_bracket",
+  "iteration": 0,
+  "mode": "fusion_cad",
+  "parameters": {
+    "baseplate_length": 150.0,
+    "baseplate_width": 100.0,
+    "baseplate_thickness": 8.0,
+    "rib_height": 40.0,
+    "rib_thickness": 6.0,
+    "fillet_radius": 5.0
+  },
+  "artifact_formats": ["step", "boundary_tags"]
+}
+\end{lstlisting}
+
+\section{CAD-Only Response Example}
+\label{app:schema-response}
+
+\begin{lstlisting}[language=Python,caption={Illustrative partial CAD response},
+label={lst:response-example}]
+{
+  "schema_version": 2,
+  "part_id": "bracket",
+  "run_id": "demo_bracket",
+  "iteration": 0,
+  "status": "partial",
+  "metrics": {
+    "mass_kg": 0.4228127502,
+    "volume_m3": 0.0001565973,
+    "max_stress_mpa": null,
+    "factor_of_safety": null,
+    "max_deflection_mm": null,
+    "objective_value": null
+  },
+  "artifacts": {
+    "step": "...\\bracket_0000.step",
+    "boundary_tags": "...\\bracket_0000.boundaries.json"
+  },
+  "error": "Native CAD generation and mass extraction completed.
+            Static-stress results require manual Fusion validation."
+}
+\end{lstlisting}
+
+The partial status is intentional. It prevents a CAD success from being
+interpreted as an FEA success.
+
+\section{Selected Finalist Parameters}
+\label{app:finalist-parameters}
+
+\begin{table}[H]
+\centering
+\caption{Selected bracket finalist parameters}
+\label{tab:app-bracket-finalist}
+\begin{tabularx}{\textwidth}{Xr}
+\toprule
+\textbf{Parameter} & \textbf{Value (mm)}\\
+\midrule
+Baseplate length & 100.0328\\
+Baseplate width & 80.9380\\
+Baseplate thickness & 4.0429\\
+Rib height & 33.2576\\
+Rib thickness & 3.0000\\
+Fillet radius & 3.5308\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Selected padeye finalist parameters}
+\label{tab:app-padeye-finalist}
+\begin{tabularx}{\textwidth}{Xr}
+\toprule
+\textbf{Parameter} & \textbf{Value (mm)}\\
+\midrule
+Base length & 220.3878\\
+Base width & 150.4654\\
+Base thickness & 8.0484\\
+Lug height & 141.7256\\
+Lug thickness & 12.1613\\
+Neck width & 80.0000\\
+Gusset height & 70.0000\\
+Gusset thickness & 6.2101\\
+Fillet radius & 25.0000\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Selected stabilizer finalist parameters}
+\label{tab:app-stabilizer-finalist}
+\begin{tabularx}{\textwidth}{Xlr}
+\toprule
+\textbf{Parameter} & \textbf{Unit} & \textbf{Value}\\
+\midrule
+Skin thickness & mm & 4.0106\\
+Front spar position & \% chord & 25.0000\\
+Rear spar position & \% chord & 72.0000\\
+Front spar thickness & mm & 7.8522\\
+Rear spar thickness & mm & 6.5297\\
+Rib thickness & mm & 5.6971\\
+Root insert length & mm & 221.4762\\
+Root insert thickness & mm & 13.6624\\
+Root fillet radius & mm & 18.3273\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Manual FEA Validation Record}
+\label{app:fea-record}
+
+Each baseline and finalist FEA record should contain the fields in
+Table~\ref{tab:app-fea-checklist}.
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+\caption{Minimum manual FEA validation checklist}
+\label{tab:app-fea-checklist}\\
+\toprule
+\textbf{Record item} & \textbf{Required evidence}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Record item} & \textbf{Required evidence}\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Candidate identity &
+Part identifier, candidate identifier, source run, iteration, parameter table,
+schema version, and generator version.\\
+
+Geometry &
+Native CAD screenshot, connected-body count, volume, mass, and STEP path.\\
+
+Material &
+Name, density, Young's modulus, Poisson ratio, yield strength, and source.\\
+
+Load &
+Magnitude, unit, derivation, direction, selected faces, distribution, and
+force-per-entity state.\\
+
+Support &
+Constraint type, selected faces, physical interpretation, and screenshot.\\
+
+Contact &
+Contact type, interfaces, assumptions, and any nonlinear settings.\\
+
+Mesh &
+Element type and order, global size, local sizes, growth control, node count,
+element count, and screenshot.\\
+
+Equilibrium &
+Applied-load vector, support-reaction vector, imbalance, and percentage
+difference.\\
+
+Stress &
+Maximum von Mises stress, location, stable nearby monitored stress, and
+contour screenshot.\\
+
+Factor of safety &
+Minimum value, location, yield definition, and contour screenshot.\\
+
+Displacement &
+Maximum magnitude, monitored displacement, direction, and location.\\
+
+Convergence &
+At least three meshes, same monitored locations, result changes, and selected
+mesh justification.\\
+
+Acceptance &
+FOS and displacement pass/fail, local failure-mode checks, limitations, and
+engineering disposition.\\
+\end{longtable}
+
+\section{Bracket Corrected-Study Record Template}
+\label{app:bracket-study-template}
+
+\begin{table}[H]
+\centering
+\caption{Bracket Static Stress input record}
+\label{tab:app-bracket-input}
+\begin{tabularx}{\textwidth}{p{0.30\textwidth}X}
+\toprule
+\textbf{Field} & \textbf{Required entry}\\
+\midrule
+Material & Project Aluminum 6061-T6 properties\\
+Analytical load & 1471.5~N\\
+Fusion force input & \textbf{1472 N total}\\
+Force per entity & Off\\
+Loaded faces & Four upper sloping rib faces\\
+Load direction & Downward in the declared study coordinate system\\
+Supports & Four mounting-hole cylindrical faces\\
+Element order & Parabolic\\
+Local refinements & Mounting holes and rib-root fillets\\
+Reaction target & Approximately 1472~N opposite the applied direction\\
+Constraint checks & FOS $\geq2.5$ and displacement $\leq0.5$~mm\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Mesh-Convergence Template}
+\label{app:mesh-template}
+
+\begin{table}[H]
+\centering
+\caption{Mesh-convergence recording template}
+\label{tab:app-mesh-template}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{crrrrr}
+\toprule
+\textbf{Mesh} & \textbf{Nodes} & \textbf{Elements} &
+\textbf{Peak stress (MPa)} & \textbf{Monitored stress (MPa)} &
+\textbf{Displacement (mm)}\\
+\midrule
+1 & & & & &\\
+2 & & & & &\\
+3 & & & & &\\
+4 & & & & &\\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Mesh 1 is the coarse reference, meshes 2 and 3 are successive refinements, and
+mesh 4 is an optional confirmation. The monitored stress must use the same
+geometric region on every mesh. A moving global maximum is not a valid
+convergence quantity when it moves between unrelated singular edges.
+
+\section{Stabilizer Pressure-Band Calculation}
+\label{app:pressure-bands}
+
+Let the unnormalized weights be
+
+\begin{equation}
+\mathbf{w}=[1.00,\ 0.93,\ 0.75,\ 0.40].
+\end{equation}
+
+Their sum is 3.08. The band-force fractions are:
+
+\begin{equation}
+\hat{\mathbf{w}}=
+[0.324675,\ 0.301948,\ 0.243506,\ 0.129870].
+\end{equation}
+
+For the 11\,808~N resultant, the approximate band forces are:
+
+\begin{table}[H]
+\centering
+\caption{Prescribed stabilizer pressure-band forces}
+\label{tab:app-pressure-bands}
+\begin{tabular}{crr}
+\toprule
+\textbf{Band} & \textbf{Normalized fraction} & \textbf{Force (N)}\\
+\midrule
+1 & 0.324675 & 3833.8\\
+2 & 0.301948 & 3565.4\\
+3 & 0.243506 & 2875.1\\
+4 & 0.129870 & 1533.8\\
+\midrule
+Total & 1.000000 & 11\,808.0\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The FEA pressure for a band is its force divided by its selected CAD face area.
+The forces are prescribed engineering inputs and are not CFD results.
+
+\section{Evidence Inventory}
+\label{app:evidence-inventory}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.34\textwidth}p{0.56\textwidth}}
+\caption{Principal repository evidence used in the report}
+\label{tab:app-evidence}\\
+\toprule
+\textbf{Location} & \textbf{Evidence}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Location} & \textbf{Evidence}\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\path{src/nemo/parts/definitions} &
+Authoritative part parameters, units, materials, loads, constraints, fixed
+geometry, and boundary roles.\\
+
+\path{src/nemo/parts/analytical.py} &
+First-order volume, stress, factor-of-safety, and displacement equations.\\
+
+\path{src/nemo/optimizer.py} &
+Scaled bounded Nelder--Mead search and evaluation handling.\\
+
+\path{src/nemo/logger.py} &
+Stable one-part-per-log CSV and JSON records.\\
+
+\path{fusion_addin/NEMOBridge} &
+Fusion add-in, native generators, artifact export, and boundary selectors.\\
+
+\path{reports/final_20260728_*_validation} &
+Baseline and finalist parameters, analytical metrics, Fusion requests, Fusion
+responses, and checklists.\\
+
+\path{F360 report/Study Final.html} &
+Bracket manual study setup, mesh metadata, result views, and the recorded
+1.472~N force error.\\
+
+\path{demos/bracket-proof-of-concept} &
+Preserved initial demonstration flow and historical validation material.\\
+
+\path{reports/project-report} &
+LaTeX report source, bibliography, extracted images, reproducible chart
+script, and compiled PDF.\\
+\end{longtable}
+
+\section{Demonstration Sequence}
+\label{app:demo-sequence}
+
+A concise defense demonstration can follow this order:
+
+\begin{enumerate}
+    \item state the problem and evidence boundary;
+    \item show the three part definitions;
+    \item evaluate the three analytical baselines;
+    \item show the 60-sample and three-start workflow;
+    \item compare baseline and finalist mass;
+    \item open one stored validation package;
+    \item send or replay a bracket CAD request;
+    \item show the native bracket, mass, STEP, and boundary metadata;
+    \item identify the four support faces and four upper load faces;
+    \item explain the 1.472~N error and the corrected 1472~N procedure;
+    \item show how padeye and stabilizer roles extend the same architecture;
+    \item close with the validation work required before manufacture.
+\end{enumerate}
+
+\section{Report Metadata Requiring Confirmation}
+\label{app:metadata-placeholders}
+
+The title-page project code remains \code{MR-PRO-26-XX}, and the supervisor is
+shown as \code{SUPERVISOR NAME}. These placeholders must be replaced with the
+official project code and supervisor name before final institutional
+submission.

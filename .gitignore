@@ -11,7 +11,7 @@ build/
 dist/
 
 # NEMO generated run artifacts
-data/runs/*/
+data/runs/*
 !data/runs/.gitkeep
 !data/runs/active/
 data/runs/active/*
@@ -23,6 +23,18 @@ reports/screenshots/*
 # Reproducible run-specific packages stay local until their checklists contain
 # reviewed Fusion FEA evidence. Curated packages already tracked remain tracked.
 reports/*_validation/
+
+# LaTeX compiler intermediates; keep report sources and intentional PDFs
+reports/**/*.aux
+reports/**/*.bbl
+reports/**/*.blg
+reports/**/*.fdb_latexmk
+reports/**/*.fls
+reports/**/*.lof
+reports/**/*.log
+reports/**/*.lot
+reports/**/*.out
+reports/**/*.toc
 
 # Fusion/local exports
 *.f3d

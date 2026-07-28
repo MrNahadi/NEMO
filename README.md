@@ -27,15 +27,16 @@ worked with a CAD automation add-in.
 7. [First Offline Run](#first-offline-run)
 8. [Autodesk Fusion Setup](#autodesk-fusion-setup)
 9. [Generate CAD from Python](#generate-cad-from-python)
-10. [Sampling and Optimization](#sampling-and-optimization)
-11. [Manual FEA Validation](#manual-fea-validation)
-12. [Results Dashboard](#results-dashboard)
-13. [Files Produced by NEMO](#files-produced-by-nemo)
-14. [Command Reference](#command-reference)
-15. [Testing](#testing)
-16. [Troubleshooting](#troubleshooting)
-17. [Repository Structure](#repository-structure)
-18. [Limitations and Future Work](#limitations-and-future-work)
+10. [Original Bracket Proof of Concept](#original-bracket-proof-of-concept)
+11. [Sampling and Optimization](#sampling-and-optimization)
+12. [Manual FEA Validation](#manual-fea-validation)
+13. [Results Dashboard](#results-dashboard)
+14. [Files Produced by NEMO](#files-produced-by-nemo)
+15. [Command Reference](#command-reference)
+16. [Testing](#testing)
+17. [Troubleshooting](#troubleshooting)
+18. [Repository Structure](#repository-structure)
+19. [Limitations and Future Work](#limitations-and-future-work)
 
 ## What NEMO Does
 
@@ -72,7 +73,9 @@ CAD generation, STEP/STL export, and manual FEA validation.
 The bracket is the original proof-of-concept. It has a baseplate, bolt holes,
 two reinforcing ribs, and a root fillet. Its six variables are baseplate length,
 baseplate width, baseplate thickness, rib height, rib thickness, and fillet
-radius.
+radius. The historical brief, manual handshake probe, and curated bracket
+validation packages are preserved under
+[`demos/bracket-proof-of-concept/`](demos/bracket-proof-of-concept/README.md).
 
 ### Padeye
 
@@ -718,6 +721,38 @@ Generate it with:
 
 Every required parameter must be present and inside its configured range.
 
+## Original Bracket Proof of Concept
+
+The original bracket demonstration is preserved in:
+
+```text
+demos/bracket-proof-of-concept/
+```
+
+Its dedicated
+[`README.md`](demos/bracket-proof-of-concept/README.md) explains the original
+intent, retained files, Fusion setup, one-request handshake demonstration, and
+the complete bracket pipeline.
+
+The maintained demo still uses the shared bracket definition, analytical model,
+bounded Nelder-Mead optimizer, NEMOBridge, and native Fusion generator. Run the
+complete demonstration with Fusion and NEMOBridge already open:
+
+```powershell
+.\build.bat fusion bracket
+```
+
+The distinction between the original intent and current implementation matters:
+optimization iterations use the analytical screening evaluator. NEMOBridge then
+generates CAD for the selected finalists, and Fusion Static Stress validation
+is manual. Automated Fusion FEA solve/result extraction was investigated but
+was not completed.
+
+Historical bracket runs and CAD exports remain under `data/runs/`. They are
+generated local evidence and are intentionally excluded from Git. Do not remove
+the `*bracket*` run or artifact folders before a planned demonstration unless a
+separate backup exists.
+
 ## Sampling and Optimization
 
 ### Why sample before optimizing?
@@ -1217,31 +1252,79 @@ This is possible because the analytical model is a screening approximation.
 4. Repeat sampling and optimization.
 5. Base the final engineering claim on the Fusion-validated candidate.
 
+## Academic Project Report
+
+The current final-year project report is
+[`reports/project-report/main.pdf`](reports/project-report/main.pdf). Its
+editable LaTeX source is in
+[`reports/project-report/`](reports/project-report/), with chapter files under
+`structure/`, references in `references.bib`, and reproducible chart and
+Fusion-report extraction code in `scripts/generate_report_assets.py`.
+
+The compiled report has 64 numbered content pages before the bibliography and
+appendices. It includes the bracket proof of concept as the worked methodology
+example, the corresponding padeye and stabilizer workflow, the zero direct-cash
+budget, and a concise September 2026--March 2027 Gantt chart. All 89 PDF pages
+use A4 portrait orientation.
+
+To regenerate the figures and compile the report from the repository root:
+
+```powershell
+.\.venv\Scripts\python.exe reports\project-report\scripts\generate_report_assets.py
+Set-Location reports\project-report
+latexmk -pdf -interaction=nonstopmode -halt-on-error main.tex
+Set-Location ..\..
+```
+
+The report keeps the analytical-to-Fusion evidence boundary explicit. In
+particular, the bracket analytical load remains 1471.5 N, while the manual
+Fusion force entry is rounded to the integer value **1472 N** because Fusion
+does not accept decimal force input in this workflow.
+
 ## Repository Structure
 
 ```text
 NEMO/
-|-- README.md                         This complete reader and setup guide
+|-- .agents/                          Repository-local agent support
+|-- .gitignore                        Generated-file and local-tool exclusions
+|-- AGENTS.md                         Coding-agent rules and safety boundary
+|-- README.md                         Complete reader and setup guide
 |-- build.bat                         Beginner menu and pipeline launcher
-|-- pyproject.toml                    Python package and dependency definition
-|-- pytest.ini                       Test discovery and Fusion test marker
+|-- pyproject.toml                    Package and dependency definition
+|-- pytest.ini                        Test discovery and Fusion marker
+|-- requirements.txt                 Runtime dependency mirror
 |-- dashboard/
-|   `-- app.py                       Streamlit results dashboard
+|   |-- app.py                        Streamlit results dashboard
+|   `-- formatting.py                 Result display helpers
 |-- data/
-|   `-- runs/                        Generated samples, optimizations, and IPC
+|   `-- runs/
+|       |-- active/                   Live NEMOBridge IPC and local CAD exports
+|       `-- <run-id>*/                Generated samples and optimizations
+|-- demos/
+|   `-- bracket-proof-of-concept/
+|       |-- README.md                 Preserved demo and operating instructions
+|       |-- PROJECT_BRIEF.md          Historical project brief and plan
+|       |-- manual_fusion_handshake.py One visible bracket CAD update
+|       `-- validation/               Current and legacy bracket finalists
 |-- docs/
 |   |-- API_SPIKE_LOG.md             Fusion automation investigation
 |   |-- ASSUMPTIONS.md               Engineering assumptions
 |   |-- IMPLEMENTATION_PLAN.md       Current implementation status
 |   |-- OPEN_FEA_CONTRACT.md         Future Gmsh/CalculiX interface
-|   `-- VALIDATION_PLAN.md           Manual validation requirements
+|   |-- VALIDATION_PLAN.md           Manual validation requirements
+|   `-- VALIDATION_STATUS.md         Recorded software/CAD evidence
 |-- fusion_addin/
+|   |-- diagnostics/                  Fusion API inspection utility
 |   `-- NEMOBridge/
 |       |-- NEMOBridge.py            Request watcher and response writer
 |       |-- fusion_generators.py     Native CAD generators
 |       |-- NEMOBridge.manifest      Fusion add-in manifest
 |       `-- config.json              Handshake and definition paths
-|-- reports/                         Validation packages and report artifacts
+|-- reports/
+|   |-- baseline-screening-results.md  Saved analytical baseline summary
+|   |-- project-report/              LaTeX source and intentional PDF
+|   |-- proposal/                    LaTeX source and intentional PDF
+|   `-- *_validation/                Generated local validation packages
 |-- src/nemo/
 |   |-- cli.py                       Command-line interface
 |   |-- config.py                    Compatibility and scaling helpers
@@ -1258,6 +1341,33 @@ NEMO/
 |       `-- definitions/             Bracket, padeye, stabilizer JSON manifests
 `-- tests/                            Offline and opt-in Fusion tests
 ```
+
+### Source, generated data, and local baggage
+
+The maintained source consists of `src`, `fusion_addin`, `dashboard`, `tests`,
+`docs`, the curated `demos` material, report source, and the root configuration
+files.
+
+The following folders are local or generated and are excluded from Git:
+
+- `.venv/`: the project-specific Python environment; large but recreated by
+  `build.bat setup`;
+- `.pytest_cache/`, `__pycache__/`, and `*.egg-info/`: disposable Python test,
+  bytecode, and installation caches;
+- `data/runs/`: run CSV/JSON, live handshake files, logs, STEP/STL exports, and
+  boundary metadata, except for placeholder files;
+- timestamped `reports/*_validation/` folders: reproducible candidate packages
+  that remain local until their evidence is deliberately curated; and
+- LaTeX compiler intermediates such as `.aux`, `.log`, `.fls`, `.bbl`, and
+  `.toc`.
+
+The PDFs in `reports/project-report/` and `reports/proposal/` are intentional
+deliverables. Their `.tex`, `structure/*.tex`, and `references.bib` files are
+the editable sources.
+
+The bracket proof-of-concept's generated runs and CAD exports also remain under
+`data/runs/`. They are deliberately preserved for the live demo even though
+they are ignored by Git.
 
 ## Limitations and Future Work
 

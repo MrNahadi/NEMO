@@ -27,8 +27,12 @@ If the project uses the analytical fallback, validate:
 
 Generated packages:
 
-- `reports/fusion_validation_package`: aggressive candidates selected with analytical FOS >= 2.5 and deflection <= 0.5 mm.
-- `reports/fusion_validation_package_conservative`: backup candidates selected with analytical FOS >= 3.0 and deflection <= 0.4 mm.
+- `demos/bracket-proof-of-concept/validation/legacy-aggressive`: original
+  bracket candidates selected with analytical FOS >= 2.5 and deflection
+  <= 0.5 mm.
+- `demos/bracket-proof-of-concept/validation/legacy-conservative`: original
+  bracket backup candidates selected with analytical FOS >= 3.0 and deflection
+  <= 0.4 mm.
 
 Use the aggressive package first. If Fusion shows the analytical model is optimistic and the lightest candidates fail, validate the conservative package next.
 

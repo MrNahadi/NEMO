@@ -99,13 +99,13 @@ Next action: continue with analytical optimization plus manual Fusion validation
 - Ran `formal_optimize_baseline` from the configured baseline for 80 Nelder-Mead iterations.
 - Ran `formal_optimize_best_sample` from the lightest feasible sample design for 80 Nelder-Mead iterations.
 - Best aggressive analytical candidate:
-  - source: `reports/fusion_validation_package/validation_candidates.csv`
+  - source: `demos/bracket-proof-of-concept/validation/legacy-aggressive/validation_candidates.csv`
   - candidate: `candidate_01`
   - mass: `0.11259275115646929 kg`
   - analytical FOS: `2.596506012478061`
   - analytical deflection: `0.36109273930423197 mm`
 - Conservative backup package generated:
-  - source: `reports/fusion_validation_package_conservative/validation_candidates.csv`
+  - source: `demos/bracket-proof-of-concept/validation/legacy-conservative/validation_candidates.csv`
   - lightest conservative candidate mass: `0.115923742767709 kg`
   - analytical FOS: `3.016074697852638`
   - analytical deflection: `0.27140845369979255 mm`

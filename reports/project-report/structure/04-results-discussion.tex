@@ -1,32 +1,535 @@
 \chapter{Results and Discussion}
 \label{chap:results}
 
-\section{Bracket Results}
-The baseline used a 150 by 100 by 8~mm baseplate, 40~mm rib height, 6~mm rib thickness, and 5~mm fillet radius. Table~\ref{tab:bracket-results} summarizes the analytical campaign.
+\section{Chapter Overview}
 
-\begin{table}[H]\centering
-\caption{Analytical bracket results}\label{tab:bracket-results}
-\begin{tabularx}{\textwidth}{lrrrr}\toprule
-\textbf{Design}&\textbf{Mass (kg)}&\textbf{Stress (MPa)}&\textbf{FOS}&\textbf{Deflection (mm)}\\\midrule
-Baseline&0.4181&41.53&6.65&0.196\\
-Best sample&0.2515&30.10&9.17&0.072\\
-Baseline-start result&0.1265&108.11&2.55&0.476\\
-Sample-start result&0.1126&106.30&2.60&0.361\\\bottomrule
-\end{tabularx}\end{table}
+This chapter reports software verification, analytical baselines,
+Latin-hypercube exploration, multi-start optimization, finalist selection,
+native CAD sweeps, CAD mass checks, and the bracket FEA quality-control
+finding. Analytical, CAD, and FEA results are reported separately. The chapter
+then answers the research questions and discusses the limitations of the
+evidence.
 
-The best sample reduced mass by 39.8\% but remained lightly utilized. The baseline-start search required 132 evaluations and approached the deflection constraint. The sample-start search required 134 evaluations and produced the lightest screened design: 100.09~mm length, 80.00~mm width, 4.01~mm base thickness, 33.64~mm rib height, 3.00~mm rib thickness, and 4.11~mm fillet radius.
+\section{Software Verification Results}
+\label{sec:software-results}
 
-The predicted reduction was
-\begin{equation}\frac{0.418125-0.112593}{0.418125}\times100=73.1\%.\end{equation}
-Most dimensions approached their lower bounds. This reveals both the opportunity and risk of optimization: the algorithm exploited the simplified model and limits provided. Minimum plate gauge, bolt bearing, weldability, corrosion allowance, fatigue, vibration, and fabrication tolerance must be added before accepting such thin members.
+The recorded offline campaign passed 27 tests. Three Fusion-only tests were
+skipped because they require an open Fusion session and an active NEMOBridge.
+The offline tests covered:
+
+\begin{itemize}
+    \item loading all registered part definitions;
+    \item parameter bounds and exact units;
+    \item baseline evaluation and feasibility;
+    \item qualitative sensitivity to lighter and heavier geometry;
+    \item random and Latin-hypercube sampling;
+    \item bounded optimizer behavior;
+    \item failed-evaluation containment;
+    \item schema-version-1 and schema-version-2 bridge contracts;
+    \item atomic request and correlated response handling;
+    \item stable CSV logging;
+    \item validation-package generation;
+    \item dashboard data loading; and
+    \item Fusion generator contract helpers.
+\end{itemize}
+
+The Fusion sweep remained a separate integration campaign. It requires
+desktop Fusion, changes \code{data/runs/active}, and can take several minutes
+per part. It does not solve FEA. This separation prevents a slow,
+state-dependent desktop test from being mistaken for an ordinary unit test.
+
+\section{Analytical Baselines}
+\label{sec:baseline-results}
+
+\screeningwarning
+
+Table~\ref{tab:baseline-results} gives the configured baselines. All three
+passed the implemented factor-of-safety and displacement criteria.
+
+\begin{table}[H]
+\centering
+\caption{Analytical baseline screening results}
+\label{tab:baseline-results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Part} & \textbf{Mass (kg)} & \textbf{Stress (MPa)} &
+\textbf{FOS} & \textbf{Deflection (mm)} & \textbf{Volume (m$^3$)}\\
+\midrule
+Bracket & 0.418125 & 41.5321 & 6.6455 & 0.195642 & 0.000154861\\
+Padeye & 8.847625 & 46.1070 & 5.9644 & 0.013429 & 0.001127086\\
+Stabilizer & 19.655593 & 86.9853 & 3.1730 & 3.336750 & 0.007279849\\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+The bracket and padeye baselines had large yield-based margins. Their
+deflection estimates were also well below the project limits. The stabilizer
+had less factor-of-safety and displacement margin, although it remained
+analytically feasible. These differences affected the available mass
+reduction. A highly conservative baseline provides more room for a mass-only
+optimizer than a baseline already close to an active constraint.
+
+\section{Latin-Hypercube Exploration}
+\label{sec:lhs-results}
+
+Each part used 60 samples with seed 42. Table~\ref{tab:lhs-results} summarizes
+the feasible counts and lightest feasible sampled designs.
+
+\begin{table}[H]
+\centering
+\caption{Seeded Latin-hypercube results}
+\label{tab:lhs-results}
+\begin{tabularx}{\textwidth}{Xrrrr}
+\toprule
+\textbf{Part} & \textbf{Feasible samples} &
+\textbf{Lightest mass (kg)} & \textbf{FOS} &
+\textbf{Deflection (mm)}\\
+\midrule
+Bracket & 55 of 60 & 0.245687 & 10.4945 & 0.073331\\
+Padeye & 60 of 60 & 5.923561 & 4.9324 & 0.010449\\
+Stabilizer & 47 of 60 & 16.482802 & 2.7674 & 4.107580\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The sample stage achieved its three intended purposes. It exercised broad
+combinations of bounded variables, identified feasible low-mass starting
+points, and showed that the parts had different constraint activity.
+
+The bracket had five infeasible sampled designs, but its lightest feasible
+sample still had high factor-of-safety margin. This indicates that broad
+random combinations did not automatically exploit the dimensions that control
+the screening stress.
+
+All padeye samples were feasible. The result indicates that the declared
+bounds and simplified stress model produce a generous feasible region under
+the single project load case. It does not prove that every bounded padeye
+would pass pin contact, weld, fatigue, or governing lifting rules.
+
+The stabilizer had 13 infeasible samples. Its lightest feasible sample was
+already close to both constraints compared with the other parts. The
+stabilizer therefore presented the clearest constrained search.
+
+\section{Multi-Start Optimization Results}
+\label{sec:multistart-results}
+
+Table~\ref{tab:multistart-results} gives the lightest feasible row found in
+each local run. The start names identify the configured baseline and two
+sample-derived starts.
+
+\begin{table}[H]
+\centering
+\caption{Lightest feasible result from each Nelder--Mead start}
+\label{tab:multistart-results}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrr}
+\toprule
+\textbf{Part} & \textbf{Start} & \textbf{Evaluations} &
+\textbf{Mass (kg)} & \textbf{FOS} & \textbf{Deflection (mm)}\\
+\midrule
+\multirow{3}{*}{Bracket}
+& Baseline & 132 & 0.126545 & 2.5530 & 0.475840\\
+& Sample 1 & 126 & 0.116928 & 2.5208 & 0.396650\\
+& Sample 2 & 129 & 0.113396 & 2.5386 & 0.369832\\
+\midrule
+\multirow{3}{*}{Padeye}
+& Baseline & 108 & 3.837083 & 2.8528 & 0.026150\\
+& Sample 1 & 116 & 3.609310 & 2.5767 & 0.026789\\
+& Sample 2 & 109 & 3.547772 & 2.6224 & 0.027933\\
+\midrule
+\multirow{3}{*}{Stabilizer}
+& Baseline & 110 & 14.414066 & 2.5041 & 3.932243\\
+& Sample 1 & 116 & 14.315361 & 2.5149 & 3.822300\\
+& Sample 2 & 111 & 14.391670 & 2.5331 & 3.847508\\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Every part benefited from more than one start. The lightest bracket and
+padeye feasible designs came from the second sampled start. The lightest
+stabilizer feasible design came from the first sampled start. If the study had
+used only the configured baseline, the selected masses would have been higher
+for all three parts.
+
+The bracket baseline-start result approached the 0.5~mm displacement limit,
+while the other two bracket results were governed more clearly by the
+factor-of-safety limit. The padeye displacement remained far from 0.5~mm in
+all runs, so its yield-based stress controlled the search. The stabilizer
+operated close to the factor-of-safety limit while using approximately
+76--79\% of the permitted displacement.
+
+\section{Selected Analytical Finalists}
+\label{sec:selected-finalists}
+
+The validation packages selected the lightest explicitly feasible candidates.
+Table~\ref{tab:selected-finalists} compares the selected finalist with its
+baseline.
+
+\begin{table}[H]
+\centering
+\caption{Selected analytical finalist compared with baseline}
+\label{tab:selected-finalists}
+\footnotesize
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lrrrrr}
+\toprule
+\textbf{Part} & \textbf{Baseline (kg)} &
+\textbf{Finalist (kg)} & \textbf{Reduction} &
+\textbf{Final FOS} & \textbf{Defl. (mm)}\\
+\midrule
+Bracket & 0.418125 & 0.113396 & 72.9\% & 2.5386 & 0.369832\\
+Padeye & 8.847625 & 3.547772 & 59.9\% & 2.6224 & 0.027933\\
+Stabilizer & 19.655593 & 14.315361 & 27.2\% & 2.5149 & 3.822300\\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{./images/charts/mass_baseline_finalist.png}
+\caption{Analytical baseline and selected-finalist mass. Percentages are
+screening reductions within the declared parameterized searches.}
+\label{fig:mass-comparison}
+\end{figure}
+
+The reductions are large, particularly for the bracket and padeye. They must
+be interpreted with the baseline and model scope. The baselines were
+configured reference designs, not independently weight-optimized industrial
+designs. The equations omit several failure modes. The percentage reduction
+therefore measures the opportunity found by the implemented screening model,
+not a validated service weight saving.
+
+\section{Finalist Constraint Use}
+\label{sec:constraint-use}
+
+Figure~\ref{fig:constraint-use} normalizes the finalist responses. A
+factor-of-safety ratio of 1.0 means the finalist is exactly at the minimum
+factor of safety. A displacement ratio of 1.0 means it is exactly at the
+displacement limit.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{./images/charts/constraint_use.png}
+\caption{Normalized constraint use for the selected analytical finalists}
+\label{fig:constraint-use}
+\end{figure}
+
+All three finalists have factor-of-safety ratios only slightly above 1.0. This
+result is expected from a mass-only search with a yield constraint: the
+optimizer removes material until a constraint becomes active. The result also
+shows why screening finalists need conservative backup candidates. A small
+change in load, material, stress concentration, or model bias could make the
+lightest row infeasible.
+
+The bracket displacement ratio is approximately 0.74. The padeye displacement
+ratio is approximately 0.056, so the simplified padeye search is almost
+entirely controlled by stress. The stabilizer displacement ratio is
+approximately 0.76. A later FEA model can change which constraint governs.
+
+\section{Parameter Activity and Engineering Interpretation}
+\label{sec:parameter-activity}
+
+\subsection{Bracket}
+
+The selected bracket used approximately 100.03~mm baseplate length,
+80.94~mm width, 4.04~mm baseplate thickness, 33.26~mm rib height,
+3.00~mm rib thickness, and 3.53~mm fillet radius. The length, width, plate
+thickness, and rib thickness were near their lower bounds.
+
+The pattern reflects the analytical equations. Plan dimensions and thickness
+reduce volume directly. Rib height retains section depth and bending
+resistance with less mass than a uniformly thick plate. This is a plausible
+broad trend, but the candidate has little allowance for corrosion,
+fabrication tolerance, weld size, bearing, or local plate action. The
+lower-bound activity is therefore a prompt to review the bounds and omitted
+constraints, not proof that the minimum gauge is suitable.
+
+\subsection{Padeye}
+
+The selected padeye used approximately 220.39~mm base length,
+150.47~mm base width, 8.05~mm base thickness, 141.73~mm lug height,
+12.16~mm lug thickness, 80.00~mm neck width, 70.00~mm gusset height,
+6.21~mm gusset thickness, and 25.00~mm fillet radius.
+
+Many thickness and envelope variables approached their lower bounds, while
+the fillet radius reached its upper bound. In the analytical model, a large
+fillet reduces the assumed concentration factor with a relatively modest
+volume cost. The optimizer therefore spends material on the fillet while
+reducing other dimensions. A three-dimensional contact and weld model may
+change this balance.
+
+\subsection{Stabilizer}
+
+The selected stabilizer used approximately 4.01~mm skin, 25.0\% front-spar
+position, 72.0\% rear-spar position, 7.85~mm front spar, 6.53~mm rear spar,
+5.70~mm ribs, 221.48~mm root insert, 13.66~mm insert thickness, and
+18.33~mm root fillet.
+
+The skin approached its lower bound, while the spars moved apart. A larger spar
+separation can increase effective section depth. The optimizer retained root
+reinforcement to protect the factor-of-safety limit. This response is
+consistent with the root-section model. It remains sensitive to the assumed
+pressure distribution and omitted torsion and buckling.
+
+\section{Penalty Objective and Explicit Feasibility}
+\label{sec:penalty-results}
+
+The smallest penalized objective in each stabilizer run was infeasible:
+
+\begin{table}[H]
+\centering
+\caption{Infeasible minimum-objective rows from the stabilizer searches}
+\label{tab:stabilizer-infeasible-objective}
+\begin{tabularx}{\textwidth}{Xrrr}
+\toprule
+\textbf{Start} & \textbf{Objective} & \textbf{Mass (kg)} & \textbf{FOS}\\
+\midrule
+Baseline & 13.9702 & 13.74695 & 2.38188\\
+Sample 1 & 13.7477 & 13.61934 & 2.41042\\
+Sample 2 & 13.7335 & 13.61934 & 2.41554\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The penalty increased the objective, but the low mass remained attractive
+enough to produce a smaller value than the feasible rows. If the package had
+selected the minimum objective without a feasibility filter, it would have
+promoted a failed design. The implemented selection avoided this error.
+
+This result shows a limitation and a strength. The fixed penalty weight is not
+strong enough to make every run's objective minimum feasible. However, the
+system does not treat the penalty as the acceptance rule. Explicit feasibility
+is the acceptance rule. Future work can compare adaptive penalties,
+feasibility-first ranking, or a constrained derivative-free method.
+
+\section{Native CAD Generator Sweeps}
+\label{sec:cad-sweep-results}
+
+The final sweeps used generator version 2.4. Table~\ref{tab:cad-sweep-results}
+reports their status.
+
+\begin{table}[H]
+\centering
+\caption{Baseline plus 20-vector native CAD sweep results}
+\label{tab:cad-sweep-results}
+\begin{tabularx}{\textwidth}{XrrX}
+\toprule
+\textbf{Part} & \textbf{Artifacts created} & \textbf{Integration passes} &
+\textbf{Recorded observation}\\
+\midrule
+Bracket & 21 of 21 & 21 of 21 &
+Completed in approximately 238.19~s.\\
+Padeye & 21 of 21 & 21 of 21 &
+Completed in approximately 157.19~s.\\
+Stabilizer & 21 of 21 & Final read timed out &
+All 21 artifacts were created. The outer test reached its 30-minute timeout
+while reading the final response; direct artifact audit confirmed generation.\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Every audited case contained one connected solid, positive volume, STEP
+output, boundary metadata, and non-empty required boundary roles. The result
+supports generator behavior over the seeded bounded vectors. It does not prove
+behavior for every possible point in the continuous design space.
+
+The stabilizer timeout is reported rather than hidden. The evidence supports
+successful artifact generation for all 21 vectors, but it does not support a
+claim that the complete outer integration test exited normally. The event
+also shows why long-running desktop automation should preserve intermediate
+artifacts and per-case records.
+
+\section{Analytical and Native-CAD Mass Comparison}
+\label{sec:cad-mass-results}
+
+Table~\ref{tab:cad-mass-comparison} compares analytical and Fusion CAD mass
+for each baseline and selected finalist. The percentage difference is
+calculated relative to the analytical mass.
+
+\begin{table}[H]
+\centering
+\caption{Analytical and native-CAD mass comparison}
+\label{tab:cad-mass-comparison}
+\begin{tabularx}{\textwidth}{XXrrr}
+\toprule
+\textbf{Part} & \textbf{Design} & \textbf{Analytical (kg)} &
+\textbf{Fusion CAD (kg)} & \textbf{Difference}\\
+\midrule
+Bracket & Baseline & 0.418125 & 0.422813 & +1.12\%\\
+Bracket & Finalist & 0.113396 & 0.114705 & +1.15\%\\
+Padeye & Baseline & 8.847625 & 8.897275 & +0.56\%\\
+Padeye & Finalist & 3.547772 & 3.682599 & +3.80\%\\
+Stabilizer & Baseline & 19.655593 & 19.297290 & -1.82\%\\
+Stabilizer & Finalist & 14.315361 & 14.400328 & +0.59\%\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.86\textwidth]{./images/charts/cad_mass_agreement.png}
+\caption{Analytical mass compared with Fusion native-CAD mass. The diagonal
+shows exact agreement.}
+\label{fig:cad-mass-agreement}
+\end{figure}
+
+All six differences were within 3.8\%. The agreement supports the broad
+volume approximations used for mass ranking. The padeye finalist showed the
+largest difference, which is consistent with greater geometric complexity
+around the lug crown, fillets, and gusset intersections.
+
+The agreement does not validate stress. Mass depends primarily on volume and
+density. Structural response depends on the load path, section properties,
+local geometry, support idealization, contact, and mesh. The CAD response
+therefore remains correctly marked as partial.
+
+\section{Bracket FEA Pilot and Quality-Control Finding}
+\label{sec:bracket-fea-result}
+
+The saved Fusion report documents a Static Stress study with the bracket
+geometry, Aluminum 6061-T6 properties, four mounting-hole support faces, four
+upper rib load faces, and a parabolic mesh. The report also contains result
+views. However, the load table records 1.472~N.
+
+The intended manual input was the integer value 1472~N. The saved input is
+one-thousandth of the required force. The report's very small stress and
+displacement and very high factor of safety are therefore not structural
+results for the project load.
+
+This finding changes the result status:
+
+\begin{itemize}
+    \item the geometry and interface images are valid setup evidence;
+    \item the support and load face locations are useful evidence;
+    \item the mesh metadata documents one solver configuration;
+    \item the numerical stress, factor of safety, displacement, and reaction
+    are rejected; and
+    \item a corrected 1472~N, reaction-balanced, mesh-converged study remains
+    required.
+\end{itemize}
+
+The pilot was still valuable. It showed that successful solver completion is
+not sufficient evidence. The workflow must compare the intended load with the
+stored load and compare the applied force with support reactions.
+
+\section{Comparison with the Project Objectives}
+\label{sec:objective-achievement}
+
+\begin{longtable}{p{0.08\textwidth}p{0.48\textwidth}p{0.34\textwidth}}
+\caption{Achievement of the specific objectives}
+\label{tab:objective-achievement}\\
+\toprule
+\textbf{No.} & \textbf{Objective outcome} & \textbf{Status}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{No.} & \textbf{Objective outcome} & \textbf{Status}\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+1 & Unit-aware definitions for three parts were implemented. & Achieved.\\
+2 & First-order mass, stress, FOS, and displacement models were implemented. &
+Achieved as screening models.\\
+3 & Each part completed 60 seeded LHS evaluations. & Achieved.\\
+4 & Each part completed three bounded scaled Nelder--Mead starts. & Achieved.\\
+5 & Invalid and unavailable evaluations return controlled failures. &
+Achieved.\\
+6 & A versioned atomic file bridge connects external Python and Fusion. &
+Achieved for serialized requests.\\
+7 & Native Fusion CAD, physical properties, STEP, and boundary metadata were
+generated. & Achieved.\\
+8 & Baseline plus 20-vector sweeps were executed for all parts. &
+Achieved, with the stabilizer outer-process timeout disclosed.\\
+9 & Baseline and finalist validation packages were generated. & Achieved.\\
+10 & The bracket completed the workflow through manual FEA preparation. &
+Partly achieved; the stored FEA load was wrong and must be corrected.\\
+11 & The padeye and stabilizer use the shared architecture. & Achieved through
+analytical, CAD, and validation preparation.\\
+12 & Remaining engineering validation work is stated. & Achieved.\\
+\end{longtable}
+
+\section{Answers to the Research Questions}
+\label{sec:rq-results}
+
+\subsection{Part-Aware Architecture}
+
+The registry, evaluator, sampler, optimizer, logger, bridge request, validation
+package, and dashboard processed all three part identifiers. Part-specific
+analytical equations and CAD generators were dispatched through shared
+interfaces. This evidence supports the first research question. It does not
+imply that every future part can be added without new part-specific code.
+
+\subsection{Lower-Mass Feasible Candidates}
+
+The sampling and multi-start searches found lower-mass analytically feasible
+candidates for all three parts. The selected screening reductions were
+72.9\%, 59.9\%, and 27.2\%. The evidence supports ``best feasible design
+found within the parameterized search.'' It does not support global
+optimality or validated service savings.
+
+\subsection{Native CAD and Boundary Roles}
+
+The Fusion generator created all seeded artifacts and non-empty required
+boundary roles. The bracket and padeye completed all 21 integration cases.
+The stabilizer artifact set completed, although the external test timed out
+while reading the final response. The evidence supports generator and
+boundary-contract operation over the sampled points.
+
+\subsection{Analytical and CAD Mass Agreement}
+
+Analytical and CAD mass differed by no more than 3.8\% for the six baseline and
+finalist comparisons. This supports the volume models as practical mass
+screening estimates. It does not validate structural response.
+
+\subsection{Evidence Required Before Design Acceptance}
+
+All finalists require corrected and mesh-converged FEA, applicable design-code
+checks, verified loads and material properties, local failure-mode assessment,
+fatigue, buckling where relevant, corrosion and fabrication allowances,
+physical testing where required, and qualified engineering review.
+
+\subsection{Lessons from the Bracket Proof of Concept}
+
+The bracket showed that the file bridge and native CAD can support a clear
+human-reviewed handoff. It also showed that a decimal-point or unit error can
+invalidate an apparently complete FEA report. Padeye and stabilizer work must
+therefore use integer-compatible force inputs where required, input
+checklists, reaction balance, and recorded convergence evidence.
+
+\section{Limitations of the Results}
+\label{sec:results-limitations}
+
+The analytical models are intentionally first order. They use simplified load
+paths, nominal section properties, and approximate concentration factors. The
+reported constraints include yield-based factor of safety and displacement
+only.
+
+The search used a finite sample and three local starts. A different seed,
+start, penalty, bound, or model can produce a different candidate. Several
+finalists lie near lower bounds, so the selected bounds strongly influence the
+result.
+
+The CAD sweeps verify sampled geometry, not the full continuous design space.
+They also do not check manufacturing drawings, tolerances, weld access, or
+assembly.
+
+The manual FEA evidence is incomplete. The available bracket report has an
+incorrect load and cannot validate stress or displacement. Padeye and
+stabilizer solver campaigns remain future work. No physical tests were
+performed.
 
 \section{Engineering Interpretation}
-Mass reduced with plate plan dimensions and thickness, while retained rib height preserved section depth and bending stiffness. The two searches converged to different rib-height and fillet combinations, confirming sensitivity to the starting point. Both final designs operated near the analytical FOS limit, so conservative backup candidates should accompany the lightest design during FEA.
 
-\section{Padeye and Stabilizer Outcomes}
-For the padeye, the project completed the load case, material model, nine-variable screening model, CAD generator, boundary definitions, and validation package. Critical regions are the pin-hole net section, bearing surface, lug root, gusset roots, and welded interfaces.
+The results support the central workflow claim: inexpensive analytical
+evaluation can reduce a large design set to a small group of traceable
+candidates, and native CAD can check geometry and mass before manual FEA.
+They do not support certification or fabrication.
 
-For the stabilizer, the project completed the fixed-envelope internal-structure model, pressure bands, analytical screening, CAD generator, and validation package. Critical regions are the root, spar connections, skin-spar intersections, and trailing edge. These extensions demonstrate method portability but not service-ready designs.
-
-\section{Validation Status}
-CAD generation and export were achieved, but recorded Fusion maximum stress, FOS, and displacement values were absent from the validation checklists. All numerical structural results in Table~\ref{tab:bracket-results} are therefore analytical predictions. No claim of classification approval, FEA compliance, or fabrication readiness is made.
+The most important result is not the largest percentage reduction. It is the
+separation of claims. The system recorded analytical predictions, returned
+partial CAD responses without solver values, disclosed the stabilizer timeout,
+and rejected a completed Fusion report after finding the wrong load. This
+behavior is consistent with an auditable engineering workflow.

@@ -25,6 +25,9 @@ parameterized search," not a global optimum.
 - `src/nemo/parts/analytical.py`: first-order structural screening models.
 - `fusion_addin/NEMOBridge/`: Fusion add-in, native CAD generators, and bridge
   configuration. This code runs inside Fusion's Python environment.
+- `demos/bracket-proof-of-concept/`: preserved original bracket demonstration,
+  including its historical brief, manual bridge probe, and curated validation
+  requests. Its shared runtime remains under `src/nemo/` and `fusion_addin/`.
 - `dashboard/app.py`: Streamlit viewer for generated `results.csv` and `run.json`.
 - `tests/`: offline tests plus an explicitly enabled Fusion integration sweep.
 - `data/runs/`: generated run data and the live Fusion handshake directory.

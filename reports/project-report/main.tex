@@ -1,262 +1,394 @@
-\documentclass[12pt, a4paper]{report}
+\documentclass[12pt,a4paper]{report}
 
 % ==============================================================================
-% UPRO Project Report TEMPLATE - MAIN FILE
+% JKUAT UPRO PROJECT REPORT
 % ==============================================================================
 
-% Recommended Packages
-\usepackage{graphicx}       % For handling images
-\usepackage{amsmath, amssymb} % For mathematical symbols
-\usepackage{geometry}       % For page layout
-\usepackage{pgfgantt}       % For Gantt charts
-\usepackage{setspace}       % For line spacing
-\usepackage{cite}           % For IEEE citations
-\usepackage{hyperref}       % For hyperlinks in PDF
-\usepackage{titlesec}       % For custom chapter/section formatting
-\usepackage{caption}        % For better caption formatting
-\usepackage{listings}       % For code listings
-\usepackage{booktabs}       % For professional table formatting
-\usepackage{xcolor}         % For code highlighting
-\usepackage{tikz}           % For flowcharts
-\usepackage{pdflscape}      % For landscape pages
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{geometry}
+\usepackage{pgfgantt}
+\usepackage{setspace}
+\usepackage{cite}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
 \usepackage{array}
 \usepackage{tabularx}
 \usepackage{longtable}
 \usepackage{float}
+\usepackage{multirow}
+\usepackage{enumitem}
 
-\usetikzlibrary{shapes.geometric, arrows, positioning}
-
-% TikZ Styles - Mermaid-like Theme
-\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=blue!60!black, fill=blue!5, thick]
-\tikzstyle{process} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=blue!60!black, fill=blue!5, thick]
-\tikzstyle{decision} = [diamond, aspect=2, minimum width=3cm, minimum height=1cm, text centered, draw=blue!60!black, fill=blue!5, thick]
-\tikzstyle{arrow} = [thick,->,>=stealth, draw=blue!60!black]
-
-% Code Listing Settings
-\lstset{
-  basicstyle=\ttfamily\small,
-  breaklines=true,
-  frame=single,
-  keywordstyle=\color{blue},
-  stringstyle=\color{red},
-  commentstyle=\color{green!50!black},
-  showstringspaces=false,
-  numbers=left,
-  numberstyle=\tiny\color{gray},
-  captionpos=b
+\usetikzlibrary{
+    arrows,
+    arrows.meta,
+    calc,
+    fit,
+    positioning,
+    shapes.geometric,
+    shapes.multipart
 }
 
-% Page Layout Settings (UPRO Standard)
+\definecolor{nemoblue}{HTML}{1D4ED8}
+\definecolor{nemoteal}{HTML}{0F766E}
+\definecolor{nemoorange}{HTML}{B45309}
+\definecolor{nemogray}{HTML}{475569}
+\definecolor{nemolight}{HTML}{EFF6FF}
+\definecolor{passgreen}{HTML}{166534}
+\definecolor{warningred}{HTML}{991B1B}
+
+% TikZ styles based on the report template.
+\tikzstyle{startstop}=[
+    rectangle,
+    rounded corners,
+    minimum width=3cm,
+    minimum height=1cm,
+    align=center,
+    draw=nemoblue,
+    fill=nemolight,
+    thick
+]
+\tikzstyle{process}=[
+    rectangle,
+    rounded corners,
+    minimum width=3cm,
+    minimum height=1cm,
+    align=center,
+    draw=nemoblue,
+    fill=nemolight,
+    thick
+]
+\tikzstyle{decision}=[
+    diamond,
+    aspect=2,
+    minimum width=3cm,
+    minimum height=1cm,
+    align=center,
+    draw=nemoblue,
+    fill=nemolight,
+    thick
+]
+\tikzstyle{arrow}=[thick,->,>=stealth,draw=nemoblue]
+
+\lstdefinestyle{nemo}{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    keywordstyle=\color{nemoblue}\bfseries,
+    stringstyle=\color{nemoorange},
+    commentstyle=\color{passgreen},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{nemogray},
+    captionpos=b,
+    columns=fullflexible
+}
+\lstset{style=nemo}
+
 \geometry{
     top=2cm,
     bottom=2.5cm,
-    left=1in, % Binding margin
+    left=1in,
     right=1in
 }
-\onehalfspacing % Standard 1.5 line spacing
+\onehalfspacing
+\setlength{\parindent}{1.25cm}
+\setlength{\parskip}{0pt}
+\setlist{itemsep=0.25em,topsep=0.4em}
+\emergencystretch=2em
 
-% Hyperlink Setup
 \hypersetup{
     colorlinks=true,
     linkcolor=black,
-    filecolor=magenta,      
+    filecolor=black,
     urlcolor=black,
     citecolor=black,
-    plainpages=false
+    plainpages=false,
+    pdftitle={Development and Evaluation of an Auditable, Resource-Conscious Parametric Optimization Workflow for Marine Structural Components},
+    pdfauthor={Amina Ahmed Bwana and Mboje Abdullah}
 }
 
-\captionsetup[table]{justification=centering,singlelinecheck=false}
+\captionsetup{
+    font=small,
+    labelfont=bf,
+    justification=centering,
+    singlelinecheck=false
+}
+\captionsetup[table]{position=top}
+
+\newcommand{\NEMO}{\textsc{Nemo}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\screeningwarning}{%
+    \textit{The values in this section are first-order screening estimates.
+    They are not certified engineering results and do not establish
+    manufacturing or service suitability.}%
+}
 
 \begin{document}
 
-% ==============================================================================
-% METADATA - TO BE FILLED
-% ==============================================================================
-\title{Engineering Design and Optimization of Parameterized Marine Structural Components}
-\author{Student Name}
-\date{\today}
+\title{Development and Evaluation of an Auditable, Resource-Conscious
+Parametric Optimization Workflow for Marine Structural Components}
+\author{Amina Ahmed Bwana \and Mboje Abdullah}
+\date{2026}
 
 % ==============================================================================
 % FRONT MATTER
 % ==============================================================================
 
-% Custom Title Page
 \hypersetup{pageanchor=false}
 \begin{titlepage}
 \thispagestyle{empty}
 \begin{center}
-
 {\setstretch{1.0}
 
-\vspace*{0.3cm}
+\vspace*{0.2cm}
 
-\includegraphics[width=0.22\textwidth]{./media/HDlogo.png}\\[0.6cm]
+\includegraphics[width=0.20\textwidth]{./media/HDlogo.png}\\[0.45cm]
 
-JOMO KENYATTA UNIVERSITY\\[0.3cm]
-OF\\[0.3cm]
-AGRICULTURE AND TECHNOLOGY\\[0.5cm]
+JOMO KENYATTA UNIVERSITY\\[0.2cm]
+OF\\[0.2cm]
+AGRICULTURE AND TECHNOLOGY\\[0.35cm]
 
-COLLEGE OF ENGINEERING AND TECHNOLOGY\\[0.5cm]
+COLLEGE OF ENGINEERING AND TECHNOLOGY\\[0.35cm]
 
-SCHOOL OF MECHANICAL, MANUFACTURING AND MATERIALS ENGINEERING\\[0.5cm]
+SCHOOL OF MECHANICAL, MANUFACTURING AND MATERIALS ENGINEERING\\[0.35cm]
 
-DEPARTMENT OF MARINE ENGINEERING AND MARITIME OPERATIONS\\[0.5cm]
+DEPARTMENT OF MARINE ENGINEERING AND MARITIME OPERATIONS\\[0.35cm]
 
 BACHELOR OF SCIENCE IN MARINE ENGINEERING
 
-\vspace{0.7cm}
+\vspace{0.55cm}
 \hrule
-
-\vspace{0.4cm}
-
-\textbf{ENGINEERING DESIGN AND OPTIMIZATION OF PARAMETERIZED MARINE STRUCTURAL COMPONENTS}
-
-\vspace{0.4cm}
-
-\hrule
-
-\vspace{0.7cm}
-
-{\normalsize \textbf{MR-PRO-26-XX}}\\
-
 \vspace{0.3cm}
 
-{\normalsize by}\\[0.25cm]
-{\large \textbf{AMINA AHMED BWANA - ENM241-0087/2022}}\\[0.1cm]
+{\large\bfseries
+DEVELOPMENT AND EVALUATION OF AN AUDITABLE,\\[0.08cm]
+RESOURCE-CONSCIOUS PARAMETRIC OPTIMIZATION\\[0.08cm]
+WORKFLOW FOR MARINE STRUCTURAL COMPONENTS}
 
-{\large \textbf{MBOJE ABDULLAH - ENM241-0088/2022}}\\[0.1cm]
+\vspace{0.3cm}
+\hrule
 
 \vspace{0.5cm}
 
-{\normalsize Supervised by}\\[0.2cm]
-{\large \textbf{SUPERVISOR NAME}}
+{\normalsize\textbf{MR-PRO-26-XX}}\\[0.25cm]
+
+{\normalsize by}\\[0.2cm]
+{\large\textbf{AMINA AHMED BWANA}}\\[0.05cm]
+{\normalsize ENM241-0087/2022}\\[0.2cm]
+
+{\large\textbf{MBOJE ABDULLAH}}\\[0.05cm]
+{\normalsize ENM241-0088/2022}\\[0.3cm]
+
+{\normalsize Supervised by}\\[0.15cm]
+{\large\textbf{SUPERVISOR NAME}}
 
 \vfill
 
-{\footnotesize \textit{A project report submitted in partial fulfilment of the requirements}}\\
-{\footnotesize \textit{for the award of the Degree of BACHELOR OF SCIENCE IN MARINE ENGINEERING}}\\
-{\footnotesize \textit{at the Jomo Kenyatta University of Agriculture and Technology}}\\
+{\footnotesize\textit{A project report submitted in partial fulfilment of the requirements}}\\
+{\footnotesize\textit{for the award of the Degree of Bachelor of Science in Marine Engineering}}\\
+{\footnotesize\textit{at the Jomo Kenyatta University of Agriculture and Technology}}\\[0.2cm]
 
+{\footnotesize March 2027}
 }
 \end{center}
 \end{titlepage}
 \hypersetup{pageanchor=true}
 
-%----------------------------------------------------------------------------------------
-%	PREAMBLE PAGES
-%----------------------------------------------------------------------------------------
+\pagenumbering{roman}
 
-\pagenumbering{roman} % Roman numerals for preamble
-
-% 1. Declaration
 \section*{DECLARATION}
 \addcontentsline{toc}{section}{Declaration}
 
-We hereby declare that this Project Report is our original work and has not been presented for a degree in any other university or for any other award.
+We hereby declare that this Project Report is our original work and has not
+been presented for a degree in any other university or for any other award.
 
 \vspace{1cm}
 \noindent
-\textbf{Name:} Amina Ahmed Bwana \hfill \textbf{REG NUMBER:} ENM241-0087/2022\\
-\vspace{0.5cm}
+\textbf{Name:} Amina Ahmed Bwana
+\hfill
+\textbf{REG NUMBER:} ENM241-0087/2022\\[0.5cm]
 \noindent
-\textbf{Signature:} \underline{\hspace{5cm}} \hfill \textbf{Date:} \underline{\hspace{4cm}}
+\textbf{Signature:} \underline{\hspace{5cm}}
+\hfill
+\textbf{Date:} \underline{\hspace{4cm}}
 
 \vspace{1cm}
 \noindent
-\textbf{Name:} Mboje Abdullah \hfill \textbf{REG NUMBER:} ENM241-0088/2022\\
-\vspace{0.5cm}
+\textbf{Name:} Mboje Abdullah
+\hfill
+\textbf{REG NUMBER:} ENM241-0088/2022\\[0.5cm]
 \noindent
-\textbf{Signature:} \underline{\hspace{5cm}} \hfill \textbf{Date:} \underline{\hspace{4cm}}
+\textbf{Signature:} \underline{\hspace{5cm}}
+\hfill
+\textbf{Date:} \underline{\hspace{4cm}}
 
 \vspace{1cm}
 \noindent
-\textbf{Supervisor Declaration:}
+\textbf{Supervisor Declaration}
 
 \noindent
-This Project Report has been submitted for examination with my approval as the University Supervisor.
+This Project Report has been submitted for examination with my approval as
+the University Supervisor.
 
-\vspace{1cm}
-
+\vspace{0.8cm}
 \noindent
 \textbf{Name:} Supervisor Name
+
 \vspace{1cm}
-
 \noindent
-\textbf{Signature:} \underline{\hspace{5cm}} \hfill \textbf{Date:} \underline{\hspace{4cm}}
+\textbf{Signature:} \underline{\hspace{5cm}}
+\hfill
+\textbf{Date:} \underline{\hspace{4cm}}
 
-\newpage
+\clearpage
 
 \chapter*{Dedication}
 \addcontentsline{toc}{section}{Dedication}
 
-We dedicate this Project Report to our parents, guardians, lecturers, and mentors whose encouragement, sacrifice, and guidance have supported our academic journey.
+We dedicate this Project Report to our parents, guardians, lecturers, and
+mentors. Their encouragement, sacrifice, and guidance supported our academic
+journey and the completion of this project.
 
-\newpage
+\clearpage
 
 \chapter*{Acknowledgements}
 \addcontentsline{toc}{section}{Acknowledgements}
 
-We would like to express our sincere gratitude to all those who contributed to the completion of this Project Report. We extend our deepest appreciation to our supervisor for invaluable guidance and constructive feedback.
+We thank our supervisor for the technical guidance, critical questions, and
+academic direction provided throughout this project. We also thank the staff
+of the Department of Marine Engineering and Maritime Operations for the
+knowledge and facilities that supported this work. We are grateful to our
+classmates, friends, and families for their practical help and encouragement.
+Autodesk educational access and the open-source Python community made it
+possible to complete the software work without direct project expenditure.
 
-\newpage
+\clearpage
 
 \chapter*{Abstract}
 \addcontentsline{toc}{section}{Abstract}
 
-This project investigated the constrained mass optimization of marine structural components using parameterized geometry and first-order structural models. The primary case was an Aluminium 6061-T6 equipment bracket carrying a 50~kg auxiliary unit under a 1471.5~N design load. A 30-point Latin-hypercube study and two bounded Nelder--Mead searches were completed. The baseline analytical mass was 0.4181~kg; the lightest screened candidate had a mass of 0.1126~kg, factor of safety 2.60, and deflection 0.361~mm, giving a 73.1\% analytical mass reduction. The method was extended to an S275 lifting padeye and a fixed-envelope aluminium stabilizer fin through engineering definitions, analytical models, CAD generators, and validation packages. Fusion stress results were not recorded in the available validation tables; consequently, reported stress and deflection values are screening predictions requiring mesh-converged FEA and physical validation before fabrication.
-
-\tableofcontents
-\listoffigures
-\listoftables
+This project developed and evaluated the Nelder-Mead Marine Optimizer
+(\NEMO), an auditable workflow for the parameterized mass optimization of
+marine structural components. The system combines unit-aware engineering
+definitions, first-order structural screening, seeded Latin-hypercube
+sampling, bounded multi-start Nelder--Mead search, traceable run records, a
+file-based Autodesk Fusion bridge, native CAD generation, semantic boundary
+metadata, validation-package generation, and a results dashboard. Three
+component archetypes were studied: an Aluminum 6061-T6 equipment bracket, an
+S275 steel lifting padeye, and an Aluminum 6061-T6 stabilizer fin. Each part
+used 60 seeded Latin-hypercube samples and three local-search starts. The
+lightest selected analytically feasible finalists had masses of
+0.1134~kg, 3.5478~kg, and 14.3154~kg, which corresponded to reductions of
+72.9\%, 59.9\%, and 27.2\% from the respective analytical baselines. Native
+Fusion CAD mass differed from the analytical estimate by 1.15\%, 3.80\%, and
+0.59\% for these finalists. Generator sweeps tested each baseline and 20
+seeded design vectors. The bracket and padeye completed all 21 integration
+cases. The stabilizer generated all 21 artifacts, although the outer test
+process reached its 30-minute timeout while reading the final response.
+The bracket also preserved the original proof-of-concept path into a manual
+Fusion Static Stress study. Inspection of the exported report found that the
+saved study used 1.472~N instead of the intended integer load of 1472~N. The
+FEA numerical results were therefore rejected, while the report images were
+retained as setup and quality-control evidence. The work shows that a
+resource-conscious, human-reviewed workflow can reduce routine search and CAD
+effort while keeping analytical, CAD, and FEA claims separate. The reported
+designs remain screening candidates. They require corrected, mesh-converged
+FEA, design-code checks, verified loads and materials, fatigue and fabrication
+assessment, and qualified engineering review before manufacture or service.
 
 \clearpage
+\tableofcontents
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
 
-% 2. List of Abbreviations and Symbols
 \section*{LIST OF ABBREVIATIONS AND SYMBOLS}
 \addcontentsline{toc}{section}{List of Abbreviations and Symbols}
 
 \subsection*{Abbreviations}
-\begin{tabular}{ll}
-\textbf{FEA} & Finite Element Analysis \\
-\textbf{CAD} & Computer-Aided Design \\
-\textbf{FOS} & Factor of Safety \\
-\textbf{API} & Application Programming Interface \\
-\textbf{IPC} & Inter-Process Communication \\
-\textbf{LHS} & Latin-Hypercube Sampling \\
-\end{tabular}
-
-\vspace{1cm}
+\begin{longtable}{p{0.22\textwidth}p{0.68\textwidth}}
+\textbf{API} & Application Programming Interface\\
+\textbf{CAD} & Computer-Aided Design\\
+\textbf{CAE} & Computer-Aided Engineering\\
+\textbf{CFD} & Computational Fluid Dynamics\\
+\textbf{CLI} & Command-Line Interface\\
+\textbf{FEA} & Finite Element Analysis\\
+\textbf{FOS} & Factor of Safety\\
+\textbf{IPC} & Inter-Process Communication\\
+\textbf{JSON} & JavaScript Object Notation\\
+\textbf{JKUAT} & Jomo Kenyatta University of Agriculture and Technology\\
+\textbf{LHS} & Latin-Hypercube Sampling\\
+\textbf{NACA} & National Advisory Committee for Aeronautics\\
+\textbf{NEMO} & Nelder-Mead Marine Optimizer\\
+\textbf{POC} & Proof of Concept\\
+\textbf{SI} & International System of Units\\
+\textbf{STEP} & Standard for the Exchange of Product Model Data\\
+\textbf{STL} & Stereolithography mesh format\\
+\textbf{V\&V} & Verification and Validation\\
+\end{longtable}
 
 \subsection*{Symbols}
-\begin{tabular}{ll}
-$m$ & Mass (kg) \\
-$\sigma$ & Stress (MPa) \\
-$g$ & Acceleration due to gravity (m/s$^2$) \\
-$\delta$ & Deflection (mm) \\
-\end{tabular}
-
-\newpage
+\begin{longtable}{p{0.22\textwidth}p{0.68\textwidth}}
+$A$ & Area (m$^2$)\\
+$b$ & Stabilizer span (m)\\
+$C_L$ & Lift coefficient\\
+$E$ & Young's modulus (Pa)\\
+$F_d$ & Design load (N)\\
+$F_{\min}$ & Minimum permitted factor of safety\\
+$g$ & Acceleration due to gravity (m/s$^2$)\\
+$I$ & Second moment of area (m$^4$)\\
+$J(\mathbf{x})$ & Penalized optimization objective\\
+$K_t$ & Stress-concentration factor\\
+$m$ & Mass (kg)\\
+$M$ & Bending moment (N\,m)\\
+$\rho$ & Density (kg/m$^3$)\\
+$\sigma$ & Normal or equivalent stress (MPa)\\
+$\sigma_y$ & Material yield strength (MPa)\\
+$\tau$ & Shear stress (MPa)\\
+$V$ & Volume (m$^3$) or speed (m/s), as identified in context\\
+$w$ & Penalty weight\\
+$\mathbf{x}$ & Physical design vector\\
+$\mathbf{z}$ & Scaled design vector\\
+$\delta$ & Displacement (mm)\\
+$\delta_{\max}$ & Maximum permitted displacement (mm)\\
+\end{longtable}
 
 \clearpage
+
 % ==============================================================================
 % MAIN CONTENT
 % ==============================================================================
-% Arabic numerals for main content
+
 \pagenumbering{arabic}
-% Chapters will be included here
+\label{page:main-start}
 
 \input{structure/01-introduction}
 \input{structure/02-literature-review}
 \input{structure/03-methodology}
 \input{structure/04-results-discussion}
-\input{structure/05-conclusion}
-\appendix
-\input{structure/06-appendices}
+\input{structure/05-project-planning}
+\input{structure/06-conclusion}
+
+\label{page:main-end}
+\clearpage
 
 % ==============================================================================
-% REFERENCES
+% REFERENCES AND APPENDICES
 % ==============================================================================
+
 \bibliographystyle{IEEEtran}
 \bibliography{references}
+
+\appendix
+\input{structure/07-appendices}
 
 \end{document}
