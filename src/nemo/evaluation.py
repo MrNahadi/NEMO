@@ -110,18 +110,23 @@ def _evaluate_fusion(
     request: EvaluationRequest,
     definition: PartDefinition,
 ) -> EvaluationResponse:
-    from .handshake import wait_for_response, write_request
+    from .handshake import (
+        serialized_fusion_channel,
+        wait_for_response,
+        write_request,
+    )
 
     run_dir = Path("data/runs/active")
     run_dir.mkdir(parents=True, exist_ok=True)
-    write_request(run_dir, request)
     try:
-        response = wait_for_response(
-            run_dir,
-            run_id=request.run_id,
-            iteration=request.iteration,
-            timeout_s=120.0,
-        )
+        with serialized_fusion_channel(run_dir, timeout_s=240.0):
+            write_request(run_dir, request)
+            response = wait_for_response(
+                run_dir,
+                run_id=request.run_id,
+                iteration=request.iteration,
+                timeout_s=240.0,
+            )
     except TimeoutError as exc:
         return _failed_response(request, f"Fusion timeout: {exc}")
 

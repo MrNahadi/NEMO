@@ -39,6 +39,14 @@ class PartRegistryTests(unittest.TestCase):
             self.assertTrue(is_feasible(response.metrics, definition))
             self.assertGreater(response.metrics.volume_m3, 0)
 
+    def test_padeye_gusset_height_stays_below_minimum_lug_height(self):
+        definition = get_part_definition("padeye")
+        parameters = {spec.name: spec for spec in definition.parameters}
+        self.assertLess(
+            parameters["gusset_height"].upper,
+            parameters["lug_height"].lower,
+        )
+
     def test_logger_uses_part_specific_columns(self):
         definition = get_part_definition("padeye")
         request = EvaluationRequest(

@@ -30,6 +30,21 @@ load_definition = _fusion_generators.load_definition
 write_boundary_metadata = _fusion_generators.write_boundary_metadata
 
 
+def _reload_generator_module():
+    """Reload generator edits before each serialized Fusion request."""
+
+    global _fusion_generators
+    global collect_boundary_metadata
+    global generate_part
+    global load_definition
+    global write_boundary_metadata
+    _fusion_generators = importlib.reload(_fusion_generators)
+    collect_boundary_metadata = _fusion_generators.collect_boundary_metadata
+    generate_part = _fusion_generators.generate_part
+    load_definition = _fusion_generators.load_definition
+    write_boundary_metadata = _fusion_generators.write_boundary_metadata
+
+
 APP = None
 UI = None
 HANDLERS = []
@@ -104,6 +119,7 @@ def _process_request():
     request = {"run_id": "unknown", "iteration": -1, "part_id": "bracket"}
 
     try:
+        _reload_generator_module()
         request = _read_json(request_path)
         schema_version = int(request.get("schema_version", 1))
         part_id = str(request.get("part_id", "bracket")).lower()
@@ -368,7 +384,27 @@ def _write_json_atomic(path, payload):
     with open(tmp, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=2)
         handle.write("\n")
-    os.replace(tmp, path)
+    attempts = 8
+    last_error = None
+    for attempt in range(attempts):
+        try:
+            os.replace(tmp, path)
+            return
+        except OSError as exc:
+            last_error = exc
+            if attempt == attempts - 1:
+                break
+            delay = min(0.05 * (2**attempt), 1.0)
+            _log(
+                "response.json replace attempt "
+                f"{attempt + 1}/{attempts} failed: {exc}; "
+                f"retrying in {delay:g}s"
+            )
+            time.sleep(delay)
+    raise RuntimeError(
+        f"Could not replace response.json after {attempts} attempts: "
+        f"{last_error}"
+    )
 
 
 def _safe_name(value):

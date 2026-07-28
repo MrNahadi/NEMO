@@ -10,7 +10,7 @@
     {"name": "lug_height", "unit": "mm", "lower": 140, "upper": 230, "baseline": 180, "description": "Height above the doubler plate"},
     {"name": "lug_thickness", "unit": "mm", "lower": 12, "upper": 30, "baseline": 20, "description": "Central lug thickness"},
     {"name": "neck_width", "unit": "mm", "lower": 80, "upper": 140, "baseline": 100, "description": "Lug width through the pin centre"},
-    {"name": "gusset_height", "unit": "mm", "lower": 70, "upper": 150, "baseline": 110, "description": "Twin gusset height"},
+    {"name": "gusset_height", "unit": "mm", "lower": 70, "upper": 120, "baseline": 110, "description": "Twin gusset height"},
     {"name": "gusset_thickness", "unit": "mm", "lower": 6, "upper": 18, "baseline": 10, "description": "Twin gusset thickness"},
     {"name": "fillet_radius", "unit": "mm", "lower": 8, "upper": 25, "baseline": 15, "description": "Lug and gusset root fillet radius"}
   ],

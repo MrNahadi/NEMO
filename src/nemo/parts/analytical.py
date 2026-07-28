@@ -82,8 +82,10 @@ def _padeye_values(
     pin_diameter = float(definition.fixed_geometry["pin_hole_diameter_mm"]) / 1000.0
 
     lug_root_width = min(base_length * 0.62, neck_width * 1.8)
-    lug_area = 0.5 * (lug_root_width + neck_width) * lug_height
-    lug_area += 0.25 * math.pi * neck_width**2
+    crown_radius = neck_width / 2.0
+    stem_height = max(lug_height - crown_radius, 1.0e-6)
+    lug_area = 0.5 * (lug_root_width + neck_width) * stem_height
+    lug_area += 0.5 * math.pi * crown_radius**2
     hole_area = math.pi * (pin_diameter / 2.0) ** 2
     lug_volume = max(lug_area - hole_area, 1.0e-8) * lug_thickness
     gusset_run = min(base_width * 0.42, lug_height * 0.72)

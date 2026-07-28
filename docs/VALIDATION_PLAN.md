@@ -34,14 +34,16 @@ Use the aggressive package first. If Fusion shows the analytical model is optimi
 
 ## Acceptance Criteria
 
-- Final candidate satisfies FOS >= 2.5 in Fusion.
-- Final candidate satisfies deflection <= 0.5 mm in Fusion.
+- Every final candidate satisfies FOS >= 2.5 in Fusion.
+- Bracket and padeye candidates satisfy deflection <= 0.5 mm in Fusion.
+- Stabilizer candidates satisfy tip deflection <= 5.0 mm in Fusion.
 - Report states the percent difference between analytical and Fusion values.
 - Final claim uses this wording: "best design found within this parameterized search."
 
 ## CAD Generator Acceptance
 
-- Generate the baseline and 20 seeded Latin-hypercube vectors per new part.
+- Generate the baseline and 20 seeded Latin-hypercube vectors per registered
+  part.
 - Require a healthy Fusion timeline, positive volume, and successful STEP plus
   boundary-sidecar export for every vector.
 - Re-import one baseline and one extreme candidate per part; require volume

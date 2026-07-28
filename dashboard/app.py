@@ -7,6 +7,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from dashboard.formatting import best_candidate_table
+
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNS_DIR = ROOT / "data" / "runs"
@@ -45,7 +47,7 @@ st.caption(
 ok = df[df["status"] == "ok"].copy()
 if ok.empty:
     st.error("The selected run has no successful analytical evaluations.")
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width="stretch")
     st.stop()
 
 ok["feasible"] = (
@@ -68,7 +70,7 @@ left, right = st.columns(2)
 with left:
     st.plotly_chart(
         px.line(ok, x="iteration", y="mass_kg", markers=True, title="Mass Convergence"),
-        use_container_width=True,
+        width="stretch",
     )
 with right:
     st.plotly_chart(
@@ -80,7 +82,7 @@ with right:
             hover_data=["iteration", "factor_of_safety", "max_deflection_mm", "objective_value"],
             title="Stress vs Mass",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 left, right = st.columns(2)
@@ -89,7 +91,7 @@ with left:
         ok, x="mass_kg", y="factor_of_safety", color="feasible", title="FOS vs Mass"
     )
     fos_figure.add_hline(y=min_fos, line_dash="dash", line_color="red")
-    st.plotly_chart(fos_figure, use_container_width=True)
+    st.plotly_chart(fos_figure, width="stretch")
 with right:
     deflection_figure = px.scatter(
         ok,
@@ -99,16 +101,16 @@ with right:
         title="Deflection vs Mass",
     )
     deflection_figure.add_hline(y=max_deflection, line_dash="dash", line_color="red")
-    st.plotly_chart(deflection_figure, use_container_width=True)
+    st.plotly_chart(deflection_figure, width="stretch")
 
 st.subheader("Best Candidate")
 candidate = best_feasible if not best_feasible.empty else best_objective
-st.dataframe(candidate.T, use_container_width=True)
+st.dataframe(best_candidate_table(candidate), width="stretch", hide_index=True)
 
 parameter_metadata = metadata.get("parameters", [])
 if parameter_metadata:
     st.subheader("Design Variables")
-    st.dataframe(pd.DataFrame(parameter_metadata), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(parameter_metadata), width="stretch", hide_index=True)
 
 st.subheader("Run Data")
-st.dataframe(df, use_container_width=True)
+st.dataframe(df, width="stretch")

@@ -128,10 +128,14 @@ echo ================================================================
 
 if not exist "%PYTHON_EXE%" (
     echo [SETUP] Creating .venv ...
+    set "VENV_CREATED=0"
     where py >nul 2>&1
     if not errorlevel 1 (
         py -3 -m venv .venv
-    ) else (
+        if not errorlevel 1 set "VENV_CREATED=1"
+    )
+    if "!VENV_CREATED!"=="0" (
+        echo [SETUP] The Python launcher was unavailable or failed; trying python ...
         where python >nul 2>&1
         if errorlevel 1 (
             echo [ERROR] Python 3.10 or newer was not found.
@@ -139,8 +143,9 @@ if not exist "%PYTHON_EXE%" (
             exit /b 1
         )
         python -m venv .venv
+        if not errorlevel 1 set "VENV_CREATED=1"
     )
-    if errorlevel 1 (
+    if "!VENV_CREATED!"=="0" (
         echo [ERROR] Failed to create the virtual environment.
         exit /b 1
     )

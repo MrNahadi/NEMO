@@ -622,9 +622,9 @@ integration tests.
 Current Fusion releases distinguish Part, Assembly, and Hybrid designs. Before
 running `nemo cad`, create or activate a blank **Hybrid Design** using
 **File > New... > Hybrid Design**. NEMO creates an internal generated component;
-a Part Design rejects additional components. If the generator code is changed
-while Fusion is open, stop and restart NEMOBridge so the updated module is
-reloaded.
+a Part Design rejects additional components. Generator edits are reloaded before
+each serialized request. Stop and restart NEMOBridge after changing
+`NEMOBridge.py` itself or its configuration.
 
 ## Generate CAD from Python
 
@@ -650,6 +650,12 @@ With Fusion and NEMOBridge running, open PowerShell in the NEMO folder and run:
 NEMO will wait for Fusion. Fusion should create a generated component, calculate
 its volume, export STEP, and return a response.
 
+The padeye generator requires one connected solid. The doubler plate, lug, and
+four external gusset wings overlap volumetrically and are joined explicitly.
+The pin bore is cut last, and the two lug-root fillets are created before the
+gussets. `fixed_support` identifies only the bottom mounting face;
+`pin_bearing` identifies the cylindrical pin-bore face.
+
 The expected response has `status: "partial"`. Partial is correct: CAD and mass
 were completed, but automated FEA results are unavailable.
 
@@ -667,6 +673,10 @@ Inspect the Fusion model for:
 - three internal ribs;
 - root reinforcement; and
 - the root mounting flange.
+
+The generator applies the fin-to-flange root fillet before hollowing the
+envelope. `fixed_support` and `tip_monitor` each identify one face, while the
+four pressure bands identify only the external positive-Y skin.
 
 ### Export STL as well
 
@@ -1062,9 +1072,9 @@ This suite checks:
 
 ### Fusion integration sweep
 
-This test generates the baseline plus 20 Latin-hypercube designs for both the
-padeye and stabilizer. It can take a long time and requires Fusion and
-NEMOBridge to remain open.
+This test generates the baseline plus 20 Latin-hypercube designs for every
+registered part. It can take a long time and requires Fusion and NEMOBridge to
+remain open.
 
 Enable it only when ready:
 
@@ -1081,6 +1091,8 @@ Remove-Item Env:NEMO_FUSION_SMOKE
 
 The integration sweep checks response status, positive CAD volume, STEP export,
 and boundary metadata export. It does not run Fusion FEA.
+The latest recorded evidence and remaining manual checks are in
+`docs/VALIDATION_STATUS.md`.
 
 ## Troubleshooting
 
@@ -1139,7 +1151,7 @@ Confirm that the command uses `.venv\Scripts\python.exe`, then reinstall:
 - Consult Autodesk's official
   [add-in installation instructions](https://help.autodesk.com/view/fusion360/ENU/?caas=caas%2Fsfdcarticles%2Fsfdcarticles%2FHow-to-install-an-ADD-IN-and-Script-in-Fusion-360.html).
 
-### `nemo cad` times out after 120 seconds
+### `nemo cad` times out after 240 seconds
 
 Check the following in order:
 
@@ -1150,6 +1162,10 @@ Check the following in order:
 5. `data\runs\active\NEMOBridge.log` contains a recent request entry.
 6. Fusion is not displaying a modal dialog that blocks the API.
 7. Stop and restart NEMOBridge, then retry.
+
+The timeout message reports whether `request.json` and `response.json` exist,
+their size and age, and the last response identity observed. Use those details
+to distinguish a blocked Fusion request from a stale or locked response file.
 
 ### Fusion reports missing or unknown parameters
 
