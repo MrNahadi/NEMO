@@ -6,9 +6,10 @@ import base64
 import csv
 import json
 import re
+from io import BytesIO
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 
 REPORT_DIR = Path(__file__).resolve().parents[1]
@@ -278,9 +279,25 @@ def extract_fusion_images() -> None:
                 else "png"
             )
             output = FUSION_DIR / f"{prefix}_{index:02d}.{extension}"
-            output.write_bytes(
-                base64.b64decode(re.sub(r"\s+", "", match.group("data")))
+            decoded = base64.b64decode(
+                re.sub(r"\s+", "", match.group("data"))
             )
+            image = Image.open(BytesIO(decoded)).convert("RGB")
+            difference = ImageChops.difference(
+                image, Image.new("RGB", image.size, "white")
+            )
+            bounds = difference.getbbox()
+            if bounds is not None:
+                left, top, right, bottom = bounds
+                padding = 24
+                bounds = (
+                    max(0, left - padding),
+                    max(0, top - padding),
+                    min(image.width, right + padding),
+                    min(image.height, bottom + padding),
+                )
+                image = image.crop(bounds)
+            image.save(output)
             extracted.append(output)
 
     thumbnails = []

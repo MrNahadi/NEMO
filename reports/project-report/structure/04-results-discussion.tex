@@ -1,8 +1,6 @@
 \chapter{Results and Discussion}
 \label{chap:results}
 
-\section{Chapter Overview}
-
 This chapter reports software verification, analytical baselines,
 Latin-hypercube exploration, multi-start optimization, finalist selection,
 native CAD sweeps, CAD mass checks, and the bracket FEA quality-control
@@ -10,35 +8,22 @@ finding. Analytical, CAD, and FEA results are reported separately. The chapter
 then answers the research questions and discusses the limitations of the
 evidence.
 
-\section{Software Verification Results}
+\section{Verification Results}
 \label{sec:software-results}
 
-The recorded offline campaign passed 27 tests. Three Fusion-only tests were
-skipped because they require an open Fusion session and an active NEMOBridge.
-The offline tests covered:
+The offline verification campaign passed 27 tests; three Fusion-dependent
+tests were excluded from that campaign because they require an active desktop
+session. The completed checks covered the engineering definitions and bounds,
+baseline feasibility, expected analytical trends, repeatable sampling,
+bounded optimization, failed-evaluation containment, results recording, CAD
+handoff, candidate preparation, and results review. Native-CAD sweeps were
+evaluated separately in Section~\ref{sec:cad-sweep-results}; they did not
+perform FEA.
 
-\begin{itemize}
-    \item loading all registered part definitions;
-    \item parameter bounds and exact units;
-    \item baseline evaluation and feasibility;
-    \item qualitative sensitivity to lighter and heavier geometry;
-    \item random and Latin-hypercube sampling;
-    \item bounded optimizer behavior;
-    \item failed-evaluation containment;
-    \item schema-version-1 and schema-version-2 bridge contracts;
-    \item atomic request and correlated response handling;
-    \item stable CSV logging;
-    \item validation-package generation;
-    \item dashboard data loading; and
-    \item Fusion generator contract helpers.
-\end{itemize}
+\section{Analytical Optimization Results}
+\label{sec:analytical-results}
 
-The Fusion sweep remained a separate integration campaign. It requires
-desktop Fusion, changes \code{data/runs/active}, and can take several minutes
-per part. It does not solve FEA. This separation prevents a slow,
-state-dependent desktop test from being mistaken for an ordinary unit test.
-
-\section{Analytical Baselines}
+\subsection{Baselines}
 \label{sec:baseline-results}
 
 \screeningwarning
@@ -71,7 +56,7 @@ analytically feasible. These differences affected the available mass
 reduction. A highly conservative baseline provides more room for a mass-only
 optimizer than a baseline already close to an active constraint.
 
-\section{Latin-Hypercube Exploration}
+\subsection{Latin-Hypercube Exploration}
 \label{sec:lhs-results}
 
 Each part used 60 samples with seed 42. Table~\ref{tab:lhs-results} summarizes
@@ -112,7 +97,7 @@ The stabilizer had 13 infeasible samples. Its lightest feasible sample was
 already close to both constraints compared with the other parts. The
 stabilizer therefore presented the clearest constrained search.
 
-\section{Multi-Start Optimization Results}
+\subsection{Multi-Start Optimization}
 \label{sec:multistart-results}
 
 Table~\ref{tab:multistart-results} gives the lightest feasible row found in
@@ -161,7 +146,7 @@ all runs, so its yield-based stress controlled the search. The stabilizer
 operated close to the factor-of-safety limit while using approximately
 76--79\% of the permitted displacement.
 
-\section{Selected Analytical Finalists}
+\subsection{Selected Finalists}
 \label{sec:selected-finalists}
 
 The validation packages selected the lightest explicitly feasible candidates.
@@ -201,7 +186,7 @@ designs. The equations omit several failure modes. The percentage reduction
 therefore measures the opportunity found by the implemented screening model,
 not a validated service weight saving.
 
-\section{Finalist Constraint Use}
+\subsection{Finalist Constraint Use}
 \label{sec:constraint-use}
 
 Figure~\ref{fig:constraint-use} normalizes the finalist responses. A
@@ -228,10 +213,10 @@ ratio is approximately 0.056, so the simplified padeye search is almost
 entirely controlled by stress. The stabilizer displacement ratio is
 approximately 0.76. A later FEA model can change which constraint governs.
 
-\section{Parameter Activity and Engineering Interpretation}
+\subsection{Parameter Activity}
 \label{sec:parameter-activity}
 
-\subsection{Bracket}
+\subsubsection{Bracket}
 
 The selected bracket used approximately 100.03~mm baseplate length,
 80.94~mm width, 4.04~mm baseplate thickness, 33.26~mm rib height,
@@ -246,7 +231,7 @@ fabrication tolerance, weld size, bearing, or local plate action. The
 lower-bound activity is therefore a prompt to review the bounds and omitted
 constraints, not proof that the minimum gauge is suitable.
 
-\subsection{Padeye}
+\subsubsection{Padeye}
 
 The selected padeye used approximately 220.39~mm base length,
 150.47~mm base width, 8.05~mm base thickness, 141.73~mm lug height,
@@ -260,7 +245,7 @@ volume cost. The optimizer therefore spends material on the fillet while
 reducing other dimensions. A three-dimensional contact and weld model may
 change this balance.
 
-\subsection{Stabilizer}
+\subsubsection{Stabilizer}
 
 The selected stabilizer used approximately 4.01~mm skin, 25.0\% front-spar
 position, 72.0\% rear-spar position, 7.85~mm front spar, 6.53~mm rear spar,
@@ -273,7 +258,7 @@ reinforcement to protect the factor-of-safety limit. This response is
 consistent with the root-section model. It remains sensitive to the assumed
 pressure distribution and omitted torsion and buckling.
 
-\section{Penalty Objective and Explicit Feasibility}
+\subsection{Penalty Objective and Explicit Feasibility}
 \label{sec:penalty-results}
 
 The smallest penalized objective in each stabilizer run was infeasible:
@@ -304,7 +289,10 @@ system does not treat the penalty as the acceptance rule. Explicit feasibility
 is the acceptance rule. Future work can compare adaptive penalties,
 feasibility-first ranking, or a constrained derivative-free method.
 
-\section{Native CAD Generator Sweeps}
+\section{CAD Verification Results}
+\label{sec:cad-results}
+
+\subsection{Native CAD Generator Sweeps}
 \label{sec:cad-sweep-results}
 
 The final sweeps used generator version 2.4. Table~\ref{tab:cad-sweep-results}
@@ -314,7 +302,10 @@ reports their status.
 \centering
 \caption{Baseline plus 20-vector native CAD sweep results}
 \label{tab:cad-sweep-results}
-\begin{tabularx}{\textwidth}{XrrX}
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}X
+    rr
+    >{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Part} & \textbf{Artifacts created} & \textbf{Integration passes} &
 \textbf{Recorded observation}\\
@@ -341,7 +332,7 @@ claim that the complete outer integration test exited normally. The event
 also shows why long-running desktop automation should preserve intermediate
 artifacts and per-case records.
 
-\section{Analytical and Native-CAD Mass Comparison}
+\subsection{Analytical and Native-CAD Mass Comparison}
 \label{sec:cad-mass-results}
 
 Table~\ref{tab:cad-mass-comparison} compares analytical and Fusion CAD mass
@@ -385,39 +376,203 @@ density. Structural response depends on the load path, section properties,
 local geometry, support idealization, contact, and mesh. The CAD response
 therefore remains correctly marked as partial.
 
-\section{Bracket FEA Pilot and Quality-Control Finding}
+\section{Bracket Static Stress Study Evidence}
 \label{sec:bracket-fea-result}
 
-The saved Fusion report documents a Static Stress study with the bracket
-geometry, Aluminum 6061-T6 properties, four mounting-hole support faces, four
-upper rib load faces, and a parabolic mesh. The report also contains result
-views. However, the load table records 1.472~N.
+Two bracket Static Stress reports were available for review. Study~1 records
+the first exploratory solve, while Study~2 documents a revised setup with
+explicit images of the constrained and loaded faces. Both studies use the
+same bracket form and Aluminum 6061 material. Figure~\ref{fig:bracket-study-setups}
+shows the progression from the generated geometry to the more clearly
+documented boundary conditions.
 
-The intended manual input was the integer value 1472~N. The saved input is
-one-thousandth of the required force. The report's very small stress and
-displacement and very high factor of safety are therefore not structural
-results for the project load.
+\begin{figure}[H]
+\centering
+\begin{minipage}[t]{0.58\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_1_02.png}
+\caption*{(a) Study~1 bracket geometry}
+\end{minipage}
 
-This finding changes the result status:
+\vspace{0.3cm}
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_2_03.png}
+\caption*{(b) Study~2 mounting-hole constraints}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_2_04.png}
+\caption*{(c) Study~2 rib-face loading}
+\end{minipage}
+\caption{Bracket geometry and boundary-condition evidence from the two Fusion
+studies. Study~2 makes the four constrained mounting holes and four loaded
+upper rib faces visible.}
+\label{fig:bracket-study-setups}
+\end{figure}
 
-\begin{itemize}
-    \item the geometry and interface images are valid setup evidence;
-    \item the support and load face locations are useful evidence;
-    \item the mesh metadata documents one solver configuration;
-    \item the numerical stress, factor of safety, displacement, and reaction
-    are rejected; and
-    \item a corrected 1472~N, reaction-balanced, mesh-converged study remains
-    required.
-\end{itemize}
+The support regions in Figure~\ref{fig:bracket-study-setups}(b) correspond to
+the four cylindrical mounting-hole faces. This is a useful first
+idealization of a rigid bolt-down, although it does not represent bolt
+preload, clearance, bearing, or contact with the supporting structure. The
+arrows in Figure~\ref{fig:bracket-study-setups}(c) confirm that the upper
+sloping faces of both ribs were selected for loading. The Study~2 data,
+however, record a total magnitude of 1.472~N with \emph{force per entity}
+disabled. The intended total was 1472~N. The recorded force also contains both
+$X$ and $Z$ components, which makes direction another item that must be
+confirmed in the corrected study.
 
-The pilot was still valuable. It showed that successful solver completion is
-not sufficient evidence. The workflow must compare the intended load with the
-stored load and compare the applied force with support reactions.
+Table~\ref{tab:bracket-study-comparison} summarizes the numerical evidence.
+Study~1 does not provide a complete applied-load record, but its reported
+1.298~N support reaction and very small response show that it also operated at
+a newton-scale load. Study~2 improves traceability but preserves the
+factor-of-one-thousand magnitude error.
 
-\section{Comparison with the Project Objectives}
+\begin{table}[H]
+\centering
+\caption{Comparison of the two exploratory bracket studies}
+\label{tab:bracket-study-comparison}
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.25\textwidth}
+    >{\raggedright\arraybackslash}X
+    >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Recorded item} & \textbf{Study 1} & \textbf{Study 2}\\
+\midrule
+Load evidence &
+No complete applied-load table; reported support reaction magnitude
+1.298~N &
+1.472~N total; force per entity disabled; $X=-0.815$~N and
+$Z=-1.226$~N\\
+\addlinespace[0.35em]
+Mesh evidence &
+Parabolic elements; 10\% average element size; no refinement step &
+Parabolic elements; 4781 nodes and 2355 elements; 10\% average element
+size; no refinement step\\
+\addlinespace[0.35em]
+Maximum von Mises stress &
+0.016~MPa &
+0.026~MPa\\
+\addlinespace[0.35em]
+Minimum factor of safety &
+17\,628 &
+10\,479\\
+\addlinespace[0.35em]
+Maximum displacement &
+$4.595\times10^{-6}$~mm &
+$9.223\times10^{-6}$~mm\\
+\addlinespace[0.35em]
+Engineering status &
+Rejected because the loading is incomplete and inconsistent with the
+1.4715~kN design envelope &
+Rejected because 1.472~N was applied instead of 1472~N; direction and
+reaction balance also require confirmation\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The factor-of-safety plots in Figure~\ref{fig:bracket-fos-comparison} are
+almost uniformly blue because the display is capped at 8 while the reported
+minimum factors of safety exceed ten thousand. The images are therefore
+evidence of an unrealistically lightly loaded model, not evidence of a highly
+efficient bracket. They also illustrate why a colour plot must be read
+together with its legend and input table.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.88\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_1_03.png}
+\caption*{(a) Study~1 factor-of-safety plot}
+\end{minipage}
+
+\vspace{0.25cm}
+\begin{minipage}{0.88\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_2_05.png}
+\caption*{(b) Study~2 factor-of-safety plot}
+\end{minipage}
+\caption{Factor-of-safety plots from Studies~1 and~2. The common display cap
+of 8 masks the much larger reported values produced by the incorrect
+newton-scale loading.}
+\label{fig:bracket-fos-comparison}
+\end{figure}
+
+The von Mises plots in Figure~\ref{fig:bracket-stress-comparison} show higher
+stress around the mounting-hole edges, rib roots, and load-introduction
+regions. These locations are consistent with the expected load path and
+identify where local mesh refinement and more realistic bolt/contact modelling
+would be required. The maxima of 0.016~MPa and 0.026~MPa cannot be used for
+acceptance because neither study represents the design load.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.88\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_1_05.png}
+\caption*{(a) Study~1 von Mises stress}
+\end{minipage}
+
+\vspace{0.25cm}
+\begin{minipage}{0.88\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_2_07.png}
+\caption*{(b) Study~2 von Mises stress}
+\end{minipage}
+\caption{Von Mises stress distributions from the two exploratory studies.
+Only the qualitative locations are retained as useful evidence.}
+\label{fig:bracket-stress-comparison}
+\end{figure}
+
+Figure~\ref{fig:bracket-displacement-comparison} shows minimum displacement
+near the constrained mounting holes and larger movement across the
+unconstrained plate and rib regions. This is qualitatively consistent with the
+selected supports. The two maximum values remain several orders of magnitude
+below the analytical screening displacement because the applied study loads
+were several orders of magnitude too small. No calibration conclusion can
+therefore be drawn from the apparent difference between the analytical and
+solver responses.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.88\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_1_08.png}
+\caption*{(a) Study~1 total displacement}
+\end{minipage}
+
+\vspace{0.25cm}
+\begin{minipage}{0.88\textwidth}
+\centering
+\includegraphics[width=\textwidth]{./images/fusion/study_2_09.png}
+\caption*{(b) Study~2 total displacement}
+\end{minipage}
+\caption{Total-displacement distributions from Studies~1 and~2. The spatial
+patterns are informative, but the magnitudes are invalid for the project load.}
+\label{fig:bracket-displacement-comparison}
+\end{figure}
+
+The bracket studies therefore remain valuable as audit evidence. They confirm
+that the native geometry reached the Simulation workspace, show the intended
+support and load regions, and reveal plausible qualitative response
+locations. They also demonstrate that solver completion is not an acceptance
+criterion. A corrected 1472~N study must verify material data, direction,
+reaction balance, contact assumptions, local mesh refinement, and convergence
+before stress, factor of safety, or displacement is compared with the
+analytical finalist.
+
+\clearpage
+\section{Discussion}
+\label{sec:results-discussion}
+
+\subsection{Achievement of the Project Objectives}
 \label{sec:objective-achievement}
 
-\begin{longtable}{p{0.08\textwidth}p{0.48\textwidth}p{0.34\textwidth}}
+\begin{longtable}{
+    >{\raggedright\arraybackslash}p{0.08\textwidth}
+    >{\raggedright\arraybackslash}p{0.48\textwidth}
+    >{\raggedright\arraybackslash}p{0.34\textwidth}}
 \caption{Achievement of the specific objectives}
 \label{tab:objective-achievement}\\
 \toprule
@@ -430,76 +585,28 @@ stored load and compare the applied force with support reactions.
 \endhead
 \bottomrule
 \endfoot
-1 & Unit-aware definitions for three parts were implemented. & Achieved.\\
-2 & First-order mass, stress, FOS, and displacement models were implemented. &
-Achieved as screening models.\\
-3 & Each part completed 60 seeded LHS evaluations. & Achieved.\\
-4 & Each part completed three bounded scaled Nelder--Mead starts. & Achieved.\\
-5 & Invalid and unavailable evaluations return controlled failures. &
+1 & Unit-aware parameter spaces, materials, loads, constraints, screening
+models, and boundary roles were defined for all three components. &
+Achieved for analytical screening and CAD preparation.\\
+2 & Each part completed 60 seeded LHS evaluations and three bounded
+Nelder--Mead starts; failed evaluations remained controlled. &
 Achieved.\\
-6 & A versioned atomic file bridge connects external Python and Fusion. &
-Achieved for serialized requests.\\
-7 & Native Fusion CAD, physical properties, STEP, and boundary metadata were
-generated. & Achieved.\\
-8 & Baseline plus 20-vector sweeps were executed for all parts. &
+3 & Native Fusion geometry, physical properties, exchange artifacts, and
+semantic boundary evidence were generated. &
+Achieved for serialized CAD requests.\\
+4 & Baseline plus 20-vector CAD sweeps and baseline/finalist validation sets
+were completed. &
 Achieved, with the stabilizer outer-process timeout disclosed.\\
-9 & Baseline and finalist validation packages were generated. & Achieved.\\
-10 & The bracket completed the workflow through manual FEA preparation. &
-Partly achieved; the stored FEA load was wrong and must be corrected.\\
-11 & The padeye and stabilizer use the shared architecture. & Achieved through
-analytical, CAD, and validation preparation.\\
-12 & Remaining engineering validation work is stated. & Achieved.\\
+5 & Lower-mass analytical finalists were selected and their mass estimates
+were compared with native CAD. &
+Achieved as screening evidence; all mass differences were within 3.8\%.\\
+6 & The bracket proof of concept reached manual Static Stress review, and the
+remaining evidence required for design acceptance was identified. &
+Partly achieved; both exploratory solver studies were rejected and a corrected
+1472~N study remains required.\\
 \end{longtable}
 
-\section{Answers to the Research Questions}
-\label{sec:rq-results}
-
-\subsection{Part-Aware Architecture}
-
-The registry, evaluator, sampler, optimizer, logger, bridge request, validation
-package, and dashboard processed all three part identifiers. Part-specific
-analytical equations and CAD generators were dispatched through shared
-interfaces. This evidence supports the first research question. It does not
-imply that every future part can be added without new part-specific code.
-
-\subsection{Lower-Mass Feasible Candidates}
-
-The sampling and multi-start searches found lower-mass analytically feasible
-candidates for all three parts. The selected screening reductions were
-72.9\%, 59.9\%, and 27.2\%. The evidence supports ``best feasible design
-found within the parameterized search.'' It does not support global
-optimality or validated service savings.
-
-\subsection{Native CAD and Boundary Roles}
-
-The Fusion generator created all seeded artifacts and non-empty required
-boundary roles. The bracket and padeye completed all 21 integration cases.
-The stabilizer artifact set completed, although the external test timed out
-while reading the final response. The evidence supports generator and
-boundary-contract operation over the sampled points.
-
-\subsection{Analytical and CAD Mass Agreement}
-
-Analytical and CAD mass differed by no more than 3.8\% for the six baseline and
-finalist comparisons. This supports the volume models as practical mass
-screening estimates. It does not validate structural response.
-
-\subsection{Evidence Required Before Design Acceptance}
-
-All finalists require corrected and mesh-converged FEA, applicable design-code
-checks, verified loads and material properties, local failure-mode assessment,
-fatigue, buckling where relevant, corrosion and fabrication allowances,
-physical testing where required, and qualified engineering review.
-
-\subsection{Lessons from the Bracket Proof of Concept}
-
-The bracket showed that the file bridge and native CAD can support a clear
-human-reviewed handoff. It also showed that a decimal-point or unit error can
-invalidate an apparently complete FEA report. Padeye and stabilizer work must
-therefore use integer-compatible force inputs where required, input
-checklists, reaction balance, and recorded convergence evidence.
-
-\section{Limitations of the Results}
+\subsection{Limitations of the Results}
 \label{sec:results-limitations}
 
 The analytical models are intentionally first order. They use simplified load
@@ -521,7 +628,7 @@ incorrect load and cannot validate stress or displacement. Padeye and
 stabilizer solver campaigns remain future work. No physical tests were
 performed.
 
-\section{Engineering Interpretation}
+\subsection{Engineering Interpretation}
 
 The results support the central workflow claim: inexpensive analytical
 evaluation can reduce a large design set to a small group of traceable

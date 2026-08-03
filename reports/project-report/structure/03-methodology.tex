@@ -1,14 +1,11 @@
-\chapter{Methodology and System Development}
+\chapter{Methodology}
 \label{chap:methodology}
 
-\section{Chapter Overview}
-
-This chapter describes the research design, software architecture, data
-contracts, engineering definitions, analytical equations, design-space
-exploration, optimization method, native CAD generation, verification
-campaign, and manual FEA procedure. The bracket is used as the complete proof
-of concept. The final sections define how the same method will be applied to
-the padeye and stabilizer.
+This chapter describes the research design, engineering models,
+design-space exploration, optimization method, native CAD generation, and
+validation approach. The bracket is used as the complete proof of concept,
+while the padeye and stabilizer demonstrate the extension of the method to
+different structural forms and load paths.
 
 \section{Research Design}
 \label{sec:research-design}
@@ -40,65 +37,13 @@ later tier can reject an earlier candidate. For example, CAD failure can
 reject an analytically feasible design. Corrected FEA can reject a design that
 passes both analytical and CAD checks.
 
-\section{Functional and Non-Functional Requirements}
-\label{sec:requirements}
-
-Table~\ref{tab:system-requirements} summarizes the main implementation
-requirements.
-
-\begin{longtable}{p{0.10\textwidth}p{0.82\textwidth}}
-\caption{Principal NEMO system requirements}
-\label{tab:system-requirements}\\
-\toprule
-\textbf{ID} & \textbf{Requirement}\\
-\midrule
-\endfirsthead
-\toprule
-\textbf{ID} & \textbf{Requirement}\\
-\midrule
-\endhead
-\bottomrule
-\endfoot
-FR1 & Register the bracket, padeye, and stabilizer through one part-aware
-interface.\\
-FR2 & Read exact variables, units, bounds, baselines, materials, loads,
-constraints, fixed geometry, and boundary roles from part definitions.\\
-FR3 & Return mass, stress, factor of safety, displacement, volume, objective,
-status, and error fields through a consistent evaluation record.\\
-FR4 & Sample bounded variables with repeatable random seeds.\\
-FR5 & Run bounded multi-start Nelder--Mead search without requiring SciPy
-inside Fusion.\\
-FR6 & Preserve invalid evaluations with controlled failure status and a high
-objective.\\
-FR7 & Record one part per CSV run with stable column order.\\
-FR8 & Exchange versioned, human-readable requests and responses with
-NEMOBridge.\\
-FR9 & Correlate each response with both the run identifier and iteration.\\
-FR10 & Generate native Fusion CAD, physical mass, STEP, optional STL, and
-boundary metadata.\\
-FR11 & Create a validation package containing the baseline, selected
-finalists, Fusion requests, and a checklist.\\
-FR12 & Display recorded run results through a Streamlit dashboard.\\
-NFR1 & Use repository-relative configuration and no machine-specific
-credentials.\\
-NFR2 & Keep analytical, CAD, and FEA evidence visibly separate.\\
-NFR3 & Preserve schema-version-1 compatibility for the original bracket proof
-of concept.\\
-NFR4 & Avoid paid cloud services and operate through existing student and
-university resources.\\
-NFR5 & Do not let one invalid candidate terminate a complete optimization
-campaign.\\
-NFR6 & Do not fabricate unavailable FEA outputs.\\
-\end{longtable}
-
-\section{System Architecture}
+\subsection{Workflow Architecture}
 \label{sec:architecture}
 
-The system contains four main layers. The Python package provides the CLI,
-part registry, samplers, analytical evaluators, optimizer, logger, bridge
-client, and validation-package generator. The JSON part definitions provide
-the engineering source of truth. NEMOBridge runs inside Fusion and provides
-native CAD generation. The dashboard reads completed run records.
+The workflow contains four functional layers: a shared engineering
+definition, the analytical search, the Fusion CAD handoff, and the resulting
+evidence record. Figure~\ref{fig:system-architecture} shows how these layers
+support the study.
 
 \begin{figure}[H]
 \centering
@@ -126,19 +71,18 @@ native CAD generation. The dashboard reads completed run records.
         font=\small
     }
 ]
-\node[data] (manifest) {\textbf{Part-definition JSON}\\
+\node[data] (manifest) {\textbf{Engineering definition}\\
 Parameters, units, bounds, baselines, materials, loads, constraints, and
 boundary roles};
-\node[box,below=of manifest] (engine) {\textbf{External Python application}\\
-CLI, sampling, analytical evaluation, optimization, failure handling, and
-validation packaging};
+\node[box,below=of manifest] (engine) {\textbf{Analytical study}\\
+Sampling, evaluation, optimization, failure handling, and finalist selection};
 \node[box,below=of engine] (bridge)
-{\textbf{External bridge client}\\Atomic and correlated request/response};
+{\textbf{CAD handoff}\\Versioned and correlated request/response};
 \node[box,below=of bridge] (fusion)
-{\textbf{NEMOBridge in Fusion}\\Native CAD, physical properties, STEP, and
+{\textbf{Autodesk Fusion}\\Native CAD, physical properties, STEP, and
 boundary metadata};
 \node[data,below=of fusion] (records) {\textbf{Evidence records}\\
-CSV/JSON runs, validation packages, and Streamlit recorded-run review};
+Analytical results, validation sets, CAD artifacts, and study review};
 
 \draw[arrow] (manifest) -- (engine);
 \draw[arrow] (engine) -- (bridge);
@@ -146,67 +90,34 @@ CSV/JSON runs, validation packages, and Streamlit recorded-run review};
 \draw[arrow] (fusion) -- (records);
 \draw[arrow] (engine.west) -- ++(-0.65,0) |- (records.west);
 \end{tikzpicture}
-\caption{NEMO system architecture}
+\caption{NEMO study workflow and evidence flow}
 \label{fig:system-architecture}
 \end{figure}
 
-The external Python package is installed from \code{src/nemo}. It has access
-to the project dependencies and file system. Fusion uses an embedded Python
-environment with its own application lifecycle. Autodesk defines scripts and
-add-ins through a manifest and \code{run} and \code{stop} entry points
-\cite{autodeskAddins}. The file bridge avoids importing the external package
-inside Fusion.
+The analytical and CAD stages run in separate Python environments. Their
+separation allows the search to use the required scientific dependencies while
+Fusion retains its native application environment. A small versioned exchange
+passes candidate parameters to Fusion and returns geometry properties and
+boundary evidence. Autodesk defines the application lifecycle for Fusion
+scripts and add-ins \cite{autodeskAddins}.
 
-\section{Repository and Evidence Organization}
-\label{sec:repository-method}
+\section{Engineering Models}
+\label{sec:engineering-models}
 
-The repository separates source, generated run data, validation packages,
-documentation, reports, and the preserved proof of concept. The important
-locations are:
-
-\begin{itemize}
-    \item \code{src/nemo}: installable Python package and CLI;
-    \item \code{src/nemo/parts/definitions}: authoritative part manifests;
-    \item \code{src/nemo/parts/analytical.py}: screening equations;
-    \item \code{fusion\_addin/NEMOBridge}: Fusion generator and bridge code;
-    \item \code{data/runs}: generated optimization logs and the live channel;
-    \item \code{reports}: validation packages and report sources;
-    \item \code{docs}: engineering assumptions and interface contracts; and
-    \item \code{demos/bracket-proof-of-concept}: original demonstration,
-    instructions, and historical validation packages.
-\end{itemize}
-
-The separation prevents generated artifacts from being treated as source code.
-It also keeps the bracket demonstration available without allowing legacy
-schema assumptions to dominate the current multi-part workflow.
-
-\section{Part-Definition Contract}
+\subsection{Common Engineering Definition}
 \label{sec:part-definition}
 
-Each part manifest declares the fields needed by both the external package and
-the Fusion generator. Parameter names are exact contract keys. Units are
-explicit. Most variables use millimeters, while the stabilizer spar positions
-use percent chord. The evaluator converts millimeters to meters before using
-SI equations and converts outputs to MPa and millimeters for reporting.
+Each component was represented by one engineering definition containing its
+design variables, units, lower and upper bounds, baseline dimensions, material
+properties, design load, acceptance criteria, fixed geometry, and required
+boundary roles. Most dimensions are expressed in millimetres; the stabilizer
+spar locations are percentages of local chord. Lengths were converted to
+metres for the SI calculations, while stress and displacement were reported in
+MPa and millimetres. The same definition governed analytical evaluation,
+optimization, candidate selection, and CAD generation so that a change in
+load, bound, or unit was not applied differently at successive stages.
 
-The manifest includes:
-
-\begin{itemize}
-    \item part identifier and display name;
-    \item parameter name, label, unit, lower bound, baseline, and upper bound;
-    \item material density, yield strength, Young's modulus, and Poisson ratio;
-    \item design-load derivation and applied value;
-    \item factor-of-safety and displacement limits;
-    \item fixed dimensions and feature counts;
-    \item supported evaluation modes; and
-    \item semantic boundary roles required from the CAD generator.
-\end{itemize}
-
-This contract makes a part change a multi-layer change. A new variable must be
-available to the analytical model, optimizer, logger, validation package, CAD
-generator, and any boundary selector affected by its geometry.
-
-\section{Bracket Engineering Definition}
+\subsection{Bracket}
 \label{sec:bracket-definition}
 
 The bracket represents a foundation for a 50~kg auxiliary unit. The design
@@ -251,7 +162,7 @@ screening acceptance criteria are $FOS\geq2.5$ and
 $\delta\leq0.5$~mm. These limits are project criteria and do not replace a
 governing marine rule set.
 
-\section{Bracket Analytical Model}
+\subsubsection{Analytical formulation}
 \label{sec:bracket-model}
 
 All geometric dimensions enter the equations in meters. The approximate
@@ -330,7 +241,7 @@ stress concentration. The model does not calculate bolt bearing, bolt
 preload, weld-group stress, weld-toe fatigue, local plate bending, contact, or
 three-dimensional load sharing.
 
-\section{Padeye Engineering Definition}
+\subsection{Padeye}
 \label{sec:padeye-definition}
 
 The padeye represents a lifting point for a 500~kg working mass with a dynamic
@@ -368,7 +279,7 @@ Fillet radius & mm & 8 & 15 & 25\\
 \end{tabularx}
 \end{table}
 
-\section{Padeye Analytical Model}
+\subsubsection{Analytical formulation}
 \label{sec:padeye-model}
 
 The volume model combines the doubler plate, a tapered lug and circular crown,
@@ -415,7 +326,7 @@ nominal modes. It does not model a separate pin, pin clearance, nonlinear
 contact, local peak stress, weld geometry, or fatigue. These limitations
 define the later FEA and design-code work.
 
-\section{Stabilizer Engineering Definition}
+\subsection{Stabilizer}
 \label{sec:stabilizer-definition}
 
 The stabilizer retains a NACA 0015 outer envelope with 800~mm span, 500~mm root
@@ -467,7 +378,7 @@ Root fillet radius & mm & 12 & 25 & 40\\
 \end{tabularx}
 \end{table}
 
-\section{Stabilizer Analytical Model}
+\subsubsection{Analytical formulation}
 \label{sec:stabilizer-model}
 
 The volume model combines the two-sided skin, front and rear spar webs, three
@@ -505,7 +416,10 @@ deflection, shell buckling, panel crippling, local skin--spar stress, fatigue,
 fluid--structure interaction, and root-bearing detail. It therefore supports
 structural screening under a prescribed load, not hydrodynamic optimization.
 
-\section{Common Evaluation and Failure Handling}
+\section{Design-Space Exploration and Optimization}
+\label{sec:search-method}
+
+\subsection{Evaluation and Failure Handling}
 \label{sec:evaluation-contract}
 
 Each evaluator returns a structured record with volume, mass, maximum stress,
@@ -521,7 +435,7 @@ artifacts while structural metrics remain unavailable. The reserved
 \code{open\_fea} mode deliberately returns a controlled failure. No Gmsh or
 CalculiX result is fabricated.
 
-\section{Design-Space Exploration}
+\subsection{Latin-Hypercube Exploration}
 \label{sec:sampling-method}
 
 Each part used 60 Latin-hypercube samples with seed 42. The sampler operated in
@@ -535,7 +449,7 @@ feasible candidates. A feasible candidate met both the factor-of-safety and
 displacement constraints. Promising feasible sampled designs supplied two of
 the three optimization starts.
 
-\section{Bounded Multi-Start Optimization}
+\subsection{Bounded Multi-Start Optimization}
 \label{sec:optimization-method}
 
 The pure-Python optimizer operated on scaled coordinates. Each part used three
@@ -585,43 +499,27 @@ objective. The validation package sorts only feasible rows by mass. It retains
 five finalists so that the lightest design does not become the only candidate
 for later FEA.
 
-\section{Run Logging and Dashboard}
+\subsection{Results Recording and Review}
 \label{sec:logging-method}
 
-Each CSV log represents one part. The stable column order contains schema
-information, identifiers, mode, status, exact parameters, volume, mass, stress,
-factor of safety, displacement, objective, error, and timestamp. A companion
-\code{run.json} stores run-level metadata.
+Each evaluated candidate was recorded with its part identifier, parameter
+values, calculated metrics, feasibility status, objective, and any evaluation
+error. Run-level metadata preserved the seed and search context. A dashboard
+was used to inspect convergence, parameter activity, mass, constraint use, and
+failed evaluations without changing the underlying results.
 
-The Streamlit dashboard reads the records but does not change them. It can
-display convergence, parameter values, mass, constraints, and status. The
-dashboard is an evidence viewer, not a second source of calculation. This
-separation allows the report and dashboard to refer to the same stored rows.
+\section{CAD Generation and Boundary Definition}
+\label{sec:cad-method}
 
-\section{Versioned Fusion Bridge}
+\subsection{Versioned CAD Handoff}
 \label{sec:fusion-bridge}
 
-Schema version 2 requests contain:
-
-\begin{itemize}
-    \item \code{schema\_version};
-    \item \code{part\_id};
-    \item \code{run\_id};
-    \item \code{iteration};
-    \item \code{mode};
-    \item \code{parameters}; and
-    \item \code{artifact\_formats}.
-\end{itemize}
-
-Schema version 1 is retained for the original bracket proof of concept. It
-uses \code{parameters\_mm} and implies the bracket.
-
-The shared channel is \code{data/runs/active}. The external process takes an
-inter-process lock before it writes a request. It writes to a temporary file
-and then replaces the target atomically. NEMOBridge polls the request,
-validates the payload, rebuilds the specified part, writes artifacts, and
-returns a response. The external side accepts the response only when both
-\code{run\_id} and \code{iteration} match.
+Each CAD request identifies the schema, component, run, iteration, evaluation
+mode, parameter values, and required artifacts. A legacy form is retained for
+the original bracket demonstration. Requests and responses are written
+atomically, and each returned result is accepted only when its run and
+iteration identifiers match the candidate under evaluation. This prevents a
+partial or stale exchange from being interpreted as current evidence.
 
 \begin{figure}[H]
 \centering
@@ -636,7 +534,7 @@ returns a response. The external side accepts the response only when both
 \draw[dashed] (external.south) -- ++(0,-7.4);
 \draw[dashed] (fusion.south) -- ++(0,-7.4);
 \draw[msg] ($(external.south)+(0,-0.8)$) --
-node[above,font=\small]{atomic request.json} ($(fusion.south)+(0,-0.8)$);
+node[above,font=\small]{candidate request} ($(fusion.south)+(0,-0.8)$);
 \draw[msg] ($(fusion.south)+(0,-2.0)$) --
 node[above,font=\small]{validate schema and identifiers}
 ($(external.south)+(0,-2.0)$);
@@ -647,7 +545,7 @@ node[above,font=\small]{parameters and artifact request}
 node[above,font=\small]{native CAD, mass, STEP, boundary tags}
 ($(external.south)+(0,-4.4)$);
 \draw[msg] ($(fusion.south)+(0,-5.6)$) --
-node[above,font=\small]{atomic response.json}
+node[above,font=\small]{correlated response}
 ($(external.south)+(0,-5.6)$);
 \node[process,below=6.2cm of external] (log) {Correlate response\\and log record};
 \node[process,below=6.2cm of fusion] (partial) {Structural fields remain null\\until manual FEA};
@@ -656,19 +554,17 @@ node[above,font=\small]{atomic response.json}
 \label{fig:bridge-sequence}
 \end{figure}
 
-The channel intentionally permits only one active CAD request. Concurrent
-requests would create a race over the same files. A future protocol can assign
-one directory per request or use a queue, but the current design favors a
-simple auditable sequence.
+The handoff permits one active CAD request at a time. This serialized approach
+favours traceability over throughput and prevents two candidates from
+competing for the same exchange state.
 
-\section{Native CAD Generation}
+\subsection{Native CAD Generation}
 \label{sec:cad-generation}
 
-The Fusion generator reads the same JSON definitions as the external package.
-It does not import \code{nemo} because Fusion uses a separate Python
-environment.
+The Fusion generator uses the same engineering definitions as the analytical
+study while remaining within Fusion's separate Python environment.
 
-\subsection{Bracket Generator}
+\subsubsection{Bracket}
 
 The bracket generator creates a rectangular baseplate, cuts four mounting
 holes, creates two triangular ribs, joins the bodies, and applies four long
@@ -677,7 +573,7 @@ positive volume. It identifies the mounting-hole cylindrical faces as the
 fixed-support role and the four upper sloping rib faces as the
 equipment-load role.
 
-\subsection{Padeye Generator}
+\subsubsection{Padeye}
 
 The padeye generator creates the doubler plate, tapered lug, circular crown,
 pin bore, two root fillets, and two overlapping gussets. It requires one
@@ -685,7 +581,7 @@ connected solid. The underside of the doubler plate supplies the
 fixed-support role. The cylindrical pin-hole region supplies the
 pin-bearing role.
 
-\subsection{Stabilizer Generator}
+\subsubsection{Stabilizer}
 
 The stabilizer generator creates the root flange, lofted NACA outer envelope,
 root fillet, hollow interior, front and rear spars, three ribs, root insert,
@@ -699,7 +595,7 @@ volume from the generated component and exports STEP for downstream exchange.
 STL is optional because it is a tessellated artifact rather than the preferred
 solid exchange format.
 
-\section{Semantic Boundary Metadata}
+\subsection{Semantic Boundary Definition}
 \label{sec:boundary-method}
 
 For each required role, the generator stores one or more face signatures.
@@ -716,7 +612,10 @@ It does not automatically apply the FEA boundary condition. The engineer must
 still display the faces, compare them with the intended load path, and reject
 an incorrect selection.
 
-\section{CAD Generator Verification Campaign}
+\section{Verification and Validation}
+\label{sec:verification-validation-method}
+
+\subsection{CAD Generator Verification}
 \label{sec:cad-sweep-method}
 
 Each generator was tested with its configured baseline and 20 seeded
@@ -736,168 +635,48 @@ contract remain usable across the bounded design space. It is intentionally
 separate from the offline test suite because it requires an open Fusion
 session and mutates the shared live channel.
 
-\section{Validation-Package Method}
+\subsection{Finalist Validation Preparation}
 \label{sec:validation-package-method}
 
-For each part, the package generator combines the baseline and five light
-feasible candidates. It writes:
+For each component, the baseline and five light feasible candidates were
+assembled into a validation set. Each record retained its parameters,
+analytical predictions, intended material and boundaries, CAD status and mass,
+and fields for later FEA inputs, outputs, convergence evidence, and engineering
+disposition. This preserved the connection between a solver image and the
+candidate to which it belonged.
 
-\begin{itemize}
-    \item \code{validation\_candidates.csv};
-    \item \code{validation\_candidates.json};
-    \item one schema-version-2 Fusion request per candidate; and
-    \item a \code{VALIDATION\_CHECKLIST.md}.
-\end{itemize}
-
-The checklist records the analytical source row, parameters, predicted
-metrics, intended material, load and support roles, CAD status, CAD mass, FEA
-inputs, FEA outputs, convergence evidence, and engineering disposition. It
-prevents an unlabelled screenshot from becoming the only record of a result.
-
-\section{Bracket Proof-of-Concept Workflow}
+\subsection{Bracket Static Stress Studies}
 \label{sec:bracket-poc-method}
 
-The bracket demonstration preserves the original project intent. A complete
-fresh-start flow is:
+The bracket proof of concept continued from the analytical finalist set into
+Fusion Static Stress. Aluminum 6061 was assigned to the generated bracket, the
+four mounting-hole surfaces represented the initial fixed-support
+idealization, and the four upper sloping rib faces represented the equipment
+load interface. The intended total downward load was 1472~N, obtained by
+rounding the analytical design load of 1471.5~N to the integer input used for
+the study.
 
-\begin{enumerate}
-    \item start Fusion and open the Scripts and Add-Ins dialog;
-    \item start NEMOBridge;
-    \item run the external bracket analytical pipeline;
-    \item inspect the sampled and optimized records;
-    \item generate the bracket validation package;
-    \item submit the baseline or one finalist request to NEMOBridge;
-    \item inspect the native bracket and exported artifacts;
-    \item open the Simulation workspace and create a Static Stress study;
-    \item assign the project-defined Aluminum 6061-T6 properties;
-    \item apply fixed constraints to the four mounting-hole cylindrical faces;
-    \item apply a total downward force of \textbf{1472 N} to the four upper
-    sloping rib faces;
-    \item turn off \emph{force per entity} so 1472~N is the combined load, not
-    1472~N on each face;
-    \item generate and inspect a parabolic mesh;
-    \item solve the study;
-    \item check reaction balance, stress, factor of safety, displacement, and
-    result locations;
-    \item refine the mesh at holes and rib-root fillets;
-    \item compare the same monitored locations between meshes; and
-    \item record the results and evidence in the checklist.
-\end{enumerate}
+Two exploratory studies were reviewed. Their material assignment, boundary
+regions, mesh information, result magnitudes, and result locations were
+compared with the engineering definition. The review also checked whether the
+applied force was a total load rather than a load repeated on every selected
+face. The images and findings from both studies are presented and interpreted
+in Section~\ref{sec:bracket-fea-result}.
 
-The four upper sloping rib faces are the inclined top faces of the two ribs.
-There are two selectable top faces on each rib. They represent the equipment
-load interface.
-
-\begin{figure}[H]
-\centering
-\begin{minipage}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\textwidth]{./images/fusion/study_final_02.png}
-\caption*{(a) Bracket geometry in the Fusion report}
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.48\textwidth}
-\centering
-\includegraphics[width=\textwidth]{./images/fusion/study_final_03.png}
-\caption*{(b) Four mounting-hole support regions}
-\end{minipage}
-\caption{Bracket geometry and fixed-support setup extracted from the saved
-Fusion report. These images document study preparation. They do not validate
-the numerical result because the report used the wrong force magnitude.}
-\label{fig:fusion-bracket-supports}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.72\textwidth]{./images/fusion/study_final_04.png}
-\caption{Downward load arrows on the four upper sloping rib faces. The image
-identifies the intended load region, but the saved report records 1.472~N
-instead of the required total integer load of 1472~N.}
-\label{fig:fusion-bracket-load}
-\end{figure}
-
-\section{Manual Static Stress Quality-Control Procedure}
+\subsection{Static Stress Assessment Criteria}
 \label{sec:fea-quality-procedure}
 
-The FEA procedure separates setup confirmation, numerical verification, and
-engineering interpretation.
+Study credibility was assessed from the material properties, applied-load
+magnitude and direction, support and contact idealizations, mesh order and
+refinement, reaction balance, result locations, and stability under mesh
+change. Maximum von Mises stress, minimum factor of safety, and maximum
+displacement were considered only after these input and numerical checks.
+Peaks at constrained edges were treated cautiously because they can represent
+local singular behaviour. Even an acceptable linear-static study would cover
+only the stated load case and would not establish fatigue, buckling, weld,
+bolt, corrosion, impact, or classification compliance.
 
-\subsection{Material Check}
-
-The material record must show density, Young's modulus, Poisson ratio, and
-yield strength. The values must match the candidate definition or a justified
-alternative. The engineer must not rely only on a library material name,
-because library revisions or custom data can differ.
-
-\subsection{Load Check}
-
-The engineer must confirm the magnitude, unit, direction, and distribution.
-For the bracket, the dialog must show 1472~N total. \emph{Force per entity}
-must be off when the four faces share one total load. The arrow direction must
-match the intended downward equipment load.
-
-\subsection{Support and Contact Check}
-
-The four hole faces must be highlighted together. This idealization represents
-a rigid bolt-down and can create local peaks. A later detailed model should
-represent fasteners, bearing, contact, and preload when these effects affect
-the decision.
-
-Every contact in the solid must be reviewed. Unintended separation or a
-disconnected body can invalidate the stiffness and load path.
-
-\subsection{Mesh Check}
-
-The record must include element order, global size, minimum size, growth or
-adjacency control, node count, and element count. Local refinement should
-target mounting holes, rib-root fillets, and load-introduction edges. At least
-three systematically refined meshes should be compared.
-
-\subsection{Equilibrium Check}
-
-The vector sum of the support reactions should oppose the applied force. For
-the corrected bracket case, the vertical reaction should be close to 1472~N.
-This check is simple and would have exposed the saved report's 1.472~N input.
-
-\subsection{Result Check}
-
-Maximum von Mises stress, minimum factor of safety, and maximum displacement
-must be recorded with their locations. A peak at a constrained edge can be a
-singularity. The engineer should also record stress at a stable nearby
-location and compare it across mesh refinements.
-
-\subsection{Acceptance Check}
-
-FEA acceptance requires the corrected load, matching material, intended
-boundaries, equilibrium, stable results, and the project constraints. Even
-after these checks, the study remains one load case. It does not establish
-fatigue, buckling, weld, bolt, corrosion, impact, or classification
-compliance.
-
-\section{Use of the Existing Fusion HTML Reports}
-\label{sec:fusion-report-use}
-
-The saved \code{Study Final.html} report identifies the study type, material,
-mesh settings, support faces, load faces, and result views. It records a
-parabolic mesh with 4781 nodes and 2355 elements, an average element size of
-10\% of the model scale, a 20\% minimum element size, 10\% adaptive refinement,
-and a 20\% convergence tolerance.
-
-The same report records a force magnitude of 1.472~N. The intended load is
-1472~N. The numerical stress, factor of safety, displacement, and reactions
-from that report are invalid for the project load. They are not used in the
-optimization comparison or acceptance discussion.
-
-The report images remain useful in three limited ways:
-
-\begin{enumerate}
-    \item they show that the native bracket reached the Simulation workspace;
-    \item they show the intended support and load regions; and
-    \item they demonstrate why an audit must check inputs and reactions before
-    accepting a solved study.
-\end{enumerate}
-
-\section{Extension to Padeye FEA}
+\subsection{Extension to Padeye FEA}
 \label{sec:padeye-fea-method}
 
 The padeye study will follow the same evidence sequence with part-specific
@@ -916,7 +695,7 @@ The final design assessment must also check the selected lifting code, load
 angle range, dynamic factors, material certification, weld class, fabrication
 tolerance, inspection, proof load, fatigue, and supporting structure.
 
-\section{Extension to Stabilizer FEA}
+\subsection{Extension to Stabilizer FEA}
 \label{sec:stabilizer-fea-method}
 
 The stabilizer study will fix the root-flange interface. The 11\,808~N
@@ -935,26 +714,21 @@ hydrodynamic stage must define operational conditions and derive pressure from
 an accepted method. The structural model should then include positive and
 negative load cases, torsion, actuator loads, and relevant vessel motions.
 
-\section{Verification and Reproducibility}
+\subsection{Reproducibility and Method Limitations}
 \label{sec:method-verification}
 
-Offline verification uses focused tests during development and a full test
-suite before handoff. The tests cover manifest loading, bounds, baseline
-feasibility, qualitative sensitivity, optimizer behavior, logging, bridge
-contracts, validation packages, dashboard reading, and generator contract
-helpers.
+Software verification covered engineering-definition loading, bounds,
+baseline feasibility, qualitative model sensitivity, sampling, optimizer
+behaviour, controlled failures, results recording, CAD handoff, and finalist
+preparation. Fusion sweeps were conducted separately because they depend on an
+active desktop application; they checked geometry and boundary evidence but
+did not solve FEA.
 
-Fusion integration sweeps are deliberately opt-in because they require an open
-desktop application, take several minutes, and mutate the live channel. They
-do not perform FEA. Manual FEA evidence is recorded separately.
-
-The repository records the exact finalist parameters and analytical values in
-CSV and JSON. Fusion responses record native CAD mass and artifact paths. The
-report asset script extracts Fusion report images and regenerates the plotted
-comparisons from these stored records. This arrangement allows later reviewers
-to trace a table or figure back to an inspectable source.
-
-\section{Methodological Safety Boundary}
+Exact finalist parameters, analytical results, CAD masses, and solver-study
+evidence were retained so that the tables and figures in this report could be
+traced to the corresponding candidate. The method improves reproducibility,
+but it does not remove uncertainty in the analytical assumptions, candidate
+selection, CAD boundary identification, or manual solver setup.
 
 \screeningwarning
 

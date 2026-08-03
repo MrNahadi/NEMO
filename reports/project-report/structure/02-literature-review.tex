@@ -1,8 +1,6 @@
 \chapter{Literature Review}
 \label{chap:literature}
 
-\section{Chapter Overview}
-
 This chapter reviews the established methods on which \NEMO\ is based. The
 review covers constrained structural optimization, derivative-free search,
 Nelder--Mead, variable scaling, Latin-hypercube sampling, tiered model
@@ -11,8 +9,10 @@ applications, and computational-model credibility. It then relates these
 topics to the bracket, padeye, and stabilizer case studies and defines the
 limited research gap addressed by this project.
 
-\section{Structural Optimization as a Constrained Search}
+\section{Structural Optimization Methods}
 \label{sec:structural-optimization}
+
+\subsection{Constrained Search}
 
 Structural optimization formalizes the selection of design variables to
 improve an objective while satisfying constraints. An objective can represent
@@ -56,7 +56,7 @@ especially important because cyclic loading, corrosion, fabrication detail,
 and uncertain operational loads can govern a design that passes one static
 yield check.
 
-\section{Derivative-Free Optimization}
+\subsection{Derivative-Free Optimization}
 \label{sec:derivative-free}
 
 Many engineering analyses appear as black-box functions to the optimizer. The
@@ -83,7 +83,7 @@ workflow includes potential discontinuities from geometry checks. This
 combination supports the use of a simple derivative-free method for the
 reference implementation.
 
-\section{The Nelder--Mead Simplex Method}
+\subsection{The Nelder--Mead Simplex Method}
 \label{sec:nelder-mead-review}
 
 Nelder and Mead introduced the simplex method in 1965 \cite{nelder1965}. In an
@@ -149,7 +149,7 @@ failed trial steps.\\
 \end{tabularx}
 \end{table}
 
-\section{Variable Scaling, Bounds, and Constraint Penalties}
+\subsection{Variable Scaling, Bounds, and Constraint Penalties}
 \label{sec:scaling-review}
 
 Engineering variables can differ greatly in magnitude and unit. A plate
@@ -207,7 +207,7 @@ create a steep landscape near the boundary. The final selection must therefore
 filter explicitly for feasibility. The stabilizer case in
 Chapter~\ref{chap:results} demonstrates why this check is necessary.
 
-\section{Latin-Hypercube Sampling}
+\subsection{Latin-Hypercube Sampling}
 \label{sec:lhs-review}
 
 McKay, Beckman, and Conover introduced Latin-hypercube sampling as a stratified
@@ -238,7 +238,10 @@ poor parameter bounds or a fragile geometry generator. An unexpectedly high
 feasibility rate can reveal an over-conservative baseline or a screening model
 that does not activate the declared constraints.
 
-\section{Tiered Model Fidelity}
+\section{Model Fidelity and CAD--CAE Integration}
+\label{sec:model-fidelity-integration}
+
+\subsection{Tiered Model Fidelity}
 \label{sec:fidelity-review}
 
 Engineering optimization often combines models with different cost and
@@ -292,7 +295,7 @@ between analytical and CAD mass shows that the volume approximations represent
 the generated geometry reasonably well. It does not show that the analytical
 stress model represents local three-dimensional stress.
 
-\section{CAD--CAE Integration}
+\subsection{CAD--CAE Integration}
 \label{sec:cad-cae-review}
 
 Automated structural optimization requires dependable communication between
@@ -331,7 +334,7 @@ CAD work. Polling adds latency. Local file locking requires retry behavior.
 The bridge cannot make an unavailable solver API available. These are accepted
 trade-offs for an inspectable student-scale implementation.
 
-\section{Simulation Intent and Semantic Boundary Roles}
+\subsection{Simulation Intent and Semantic Boundary Roles}
 \label{sec:simulation-intent}
 
 Geometry changes can invalidate an analysis even when the regenerated solid
@@ -356,7 +359,7 @@ inspection. A broad geometric selector can match an unintended face. A
 topology change can divide one intended region into several faces. The manual
 FEA procedure must display and confirm every selected face before solving.
 
-\section{Marine Structural Optimization}
+\section{Marine Structural Applications}
 \label{sec:marine-optimization-review}
 
 Marine structural optimization must represent realistic loads, supports, and
@@ -417,7 +420,7 @@ Static screening followed by a stated list of required detailed checks.\\
 \end{tabularx}
 \end{table}
 
-\section{Bracket Structural Behavior}
+\subsection{Bracket Structural Behavior}
 \label{sec:bracket-review}
 
 Autodesk lists brackets among components suited to linear Static Stress
@@ -441,7 +444,7 @@ three-order-of-magnitude input error can survive through a completed solver
 run. This finding supports a workflow that checks input values and reaction
 balance before it discusses result contours.
 
-\section{Padeyes and Pinned Connections}
+\subsection{Padeyes and Pinned Connections}
 \label{sec:padeye-review}
 
 Padeyes transfer lifting force through a pin hole into a lug, reinforcement,
@@ -475,7 +478,7 @@ marking, survey, and documentation \cite{lrLifting2026}. \NEMO\ does not
 claim compliance with either source. They are cited to show the wider
 qualification work that lies beyond a single yield-based optimization.
 
-\section{Stabilizer Fins and Prescribed Hydrodynamic Loads}
+\subsection{Stabilizer Fins and Prescribed Hydrodynamic Loads}
 \label{sec:stabilizer-review}
 
 The stabilizer differs from the bracket and padeye because its load is
@@ -498,8 +501,10 @@ actuator behavior, pressure reversal, impact, and fluid--structure
 interaction. A later design stage must derive the pressure from an accepted
 hydrodynamic method, CFD, model testing, or full-scale data.
 
-\section{Linear Static Finite Element Analysis}
+\section{Finite Element Verification and Validation}
 \label{sec:linear-static-fea-review}
+
+\subsection{Linear Static Analysis}
 
 Autodesk describes a Static Stress study as appropriate when deformation is
 small, load direction does not change significantly, material properties are
@@ -529,7 +534,7 @@ location across refinements. A credible record should report the global mesh,
 local refinements, element order, node and element count, the monitored
 quantity, and the change between successive meshes.
 
-\section{Verification, Validation, and Model Credibility}
+\subsection{Verification, Validation, and Model Credibility}
 \label{sec:vv-review}
 
 Verification asks whether equations and software were solved or implemented

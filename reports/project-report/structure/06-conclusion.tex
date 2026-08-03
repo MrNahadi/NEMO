@@ -1,309 +1,143 @@
 \chapter{Conclusions and Recommendations}
 \label{chap:conclusion}
 
-\section{Chapter Overview}
+This chapter presents the conclusions supported by the analytical, CAD, and
+bracket-study evidence. It also states the limitations of the work and the
+validation required before any candidate can progress toward manufacture or
+service.
 
-This chapter states the conclusions, answers the research questions, identifies
-the project contributions, and gives recommendations for validation and future
-development. The conclusions remain limited to the evidence reported in the
-previous chapters.
-
-\section{Overall Conclusion}
+\section{Conclusions}
 \label{sec:overall-conclusion}
 
-The project developed and evaluated an auditable, resource-conscious workflow
+The study developed and evaluated an auditable, resource-conscious workflow
 for the parameterized mass optimization of three marine structural component
-archetypes. The completed system connects unit-aware engineering definitions,
-first-order screening, seeded design-space exploration, bounded multi-start
-Nelder--Mead search, failure-contained evaluation, traceable run records,
-native Fusion CAD, semantic boundary metadata, validation packages, and a
-results dashboard.
+archetypes. The same overall process represented a bracket, padeye, and
+stabilizer while allowing each component to retain its own variables,
+material, load, analytical formulation, CAD generator, and boundary roles.
+This supports the use of a shared part-aware architecture within the reported
+scope.
 
-The workflow found lower-mass analytically feasible candidates for the
-bracket, padeye, and stabilizer. The selected screening reductions were
-72.9\%, 59.9\%, and 27.2\% relative to the configured baselines. Native Fusion
-CAD mass remained within 3.8\% of the analytical mass for every baseline and
-selected-finalist comparison. These results support the use of the
-analytical volume models for early mass ranking and the use of the Fusion
-bridge for geometry and artifact verification.
+Seeded Latin-hypercube exploration and three bounded Nelder--Mead starts
+identified lower-mass candidates that satisfied the implemented analytical
+factor-of-safety and displacement criteria. The selected screening reductions
+were 72.9\% for the bracket, 59.9\% for the padeye, and 27.2\% for the
+stabilizer relative to their configured baselines. Multiple starts improved
+the best feasible mass for every part. These values describe the best
+feasible designs found within the declared parameterized searches; they do not
+prove global optimality or service-ready weight savings.
 
-The results do not establish structural qualification. The analytical models
-omit important local and service failure modes. The bracket FEA report used
-1.472~N instead of the required integer input of 1472~N. Its solver values were
-therefore rejected. Padeye and stabilizer manual FEA campaigns remain future
-work. The finalists are screening candidates that require corrected,
-mesh-converged analysis, governing design checks, verified loads and
-materials, and qualified review.
+Native Fusion generation remained usable across the seeded CAD campaigns. The
+bracket and padeye completed all 21 baseline-plus-sample cases. The stabilizer
+created all 21 artifact sets, although the outer process timed out while
+reading the final response. Analytical and native-CAD mass differed by no more
+than 3.8\% for the six baseline and finalist comparisons. This agreement
+supports the volume models for early mass ranking, but it does not validate
+stress or displacement.
 
-The central project outcome is therefore not a claim that three components are
-ready for manufacture. It is a traceable reference process that reduces a
-large candidate set, generates checkable CAD, exposes missing solver evidence,
-and prepares a small candidate set for disciplined engineering validation.
+The two bracket Static Stress studies provide the clearest lesson about
+evidence quality. Their images identify the geometry, mounting-hole supports,
+rib-face loading, and qualitative response regions. Study~2 also records the
+mesh and boundary setup more clearly than Study~1. Nevertheless, Study~2 used
+1.472~N instead of the intended 1472~N, while Study~1 did not provide a
+complete traceable load definition and reported only a 1.298~N support
+reaction. The numerical stress, factor of safety, and displacement values from
+both studies were therefore rejected.
 
-\section{Answers to the Research Questions}
-\label{sec:conclusion-rq}
+The principal outcome is a traceable method for reducing a large design set,
+checking native geometry and mass, and preparing a small candidate set for
+disciplined validation. The study does not establish structural
+qualification, fabrication readiness, or service safety.
 
-\subsection{Can One Architecture Support Three Part Types?}
-
-Yes, within the implemented scope. The registry, sampler, optimizer, logger,
-bridge schema, validation-package generator, and dashboard processed all three
-part identifiers. Each part supplied its own manifest, analytical evaluator,
-native CAD generator, and boundary selectors through shared interfaces. This
-result shows part-aware extensibility. It does not mean a fourth component can
-be added without new engineering and generator code.
-
-\subsection{Did Sampling and Multi-Start Search Find Lighter Feasible Designs?}
-
-Yes, according to the implemented screening models. Every part completed 60
-seeded Latin-hypercube evaluations and three local searches. Every selected
-finalist passed the implemented factor-of-safety and displacement constraints.
-Multiple starts improved the best feasible mass for all three parts compared
-with the baseline start alone.
-
-The result is not a global-optimum proof. The sample is finite,
-Nelder--Mead is local, the penalties are fixed, and the bounds define the
-available design family. The correct conclusion is that the method found
-lower-mass feasible candidates within the declared parameterized searches.
-
-\subsection{Did Native CAD and Boundary Identification Remain Usable?}
-
-The bracket and padeye completed all 21 baseline-plus-sample integration
-cases. The stabilizer created all 21 artifacts, although the outer test process
-timed out while reading the final response. Direct artifact audit confirmed
-one solid, positive volume, STEP export, and required boundary metadata for
-the generated cases.
-
-This evidence supports the generator contract over the tested vectors. It does
-not prove the absence of every possible topology failure in the continuous
-design space. It also does not validate the FEA boundary idealization. Human
-inspection remains necessary.
-
-\subsection{How Closely Did Analytical and CAD Mass Agree?}
-
-The six baseline and selected-finalist comparisons differed by 0.56\% to
-3.80\% in magnitude. The padeye finalist showed the largest difference. The
-close agreement supports the analytical volume models for mass screening.
-
-Mass agreement must not be extended to stress agreement. The CAD response does
-not contain structural solver results. Local stress and displacement depend on
-boundary conditions, contact, mesh, and three-dimensional load paths that are
-not established by volume agreement.
-
-\subsection{What Evidence Is Still Required?}
-
-The next evidence stage must include:
-
-\begin{enumerate}
-    \item verified material and load inputs;
-    \item realistic supports, fasteners, contacts, and load introduction;
-    \item mesh-convergence evidence at stable monitored locations;
-    \item reaction-force balance;
-    \item detailed stress, displacement, and factor-of-safety results;
-    \item governing failure-mode checks;
-    \item applicable marine or lifting-code assessment;
-    \item fatigue, buckling, corrosion, fabrication, tolerance, and inspection
-    checks as relevant;
-    \item uncertainty and sensitivity assessment; and
-    \item proof load or other physical validation where required.
-\end{enumerate}
-
-\subsection{What Did the Bracket Proof of Concept Teach?}
-
-The bracket demonstrated the intended human-reviewed chain from a
-parameterized definition to a selected design, native CAD, semantic support
-and load regions, and manual FEA preparation. It also exposed a serious
-quality-control issue. The saved study solved successfully with a force that
-was one-thousandth of the intended value.
-
-The principal lesson is that solver completion is not acceptance. A study
-checklist must compare the intended and stored load, confirm
-force-per-entity behavior, inspect supports, and compare total reactions with
-the applied force. The same checks must precede interpretation of future
-padeye and stabilizer contours.
-
-\section{Contribution of the Work}
-\label{sec:conclusion-contribution}
-
-\subsection{Engineering-Definition Contribution}
-
-The project centralizes parameters, units, bounds, baselines, materials, loads,
-constraints, fixed geometry, and boundary roles. This design reduces
-cross-layer inconsistency and gives later work a traceable source for each
-engineering input.
-
-\subsection{Optimization-Implementation Contribution}
-
-The project combines scaled coordinates, bound clipping, seeded LHS, three
-Nelder--Mead starts, caching, failed-evaluation containment, stable logging,
-and explicit feasible filtering. The stabilizer result confirms the importance
-of feasible filtering when a penalty minimum remains infeasible.
-
-\subsection{CAD-Handoff Contribution}
-
-The project provides a versioned and inspectable exchange between an external
-Python process and a Fusion add-in. Native CAD, physical properties, STEP, and
-semantic boundary metadata are returned without mislabeling CAD output as FEA.
-
-\subsection{Evidence-Management Contribution}
-
-The report separates software, analytical, CAD, FEA, physical-validation, and
-qualification evidence. It records partial status when only CAD evidence
-exists. It also retains and explains a failed FEA input case. This separation
-improves auditability and academic credibility.
-
-\subsection{Practical and Educational Contribution}
-
-The workflow was completed with a KES 0 direct-cash budget by using existing
-hardware, educational Fusion access, open-source Python tools, local
-computation, and digital documentation. The result provides a reusable
-teaching example for model assumptions, optimization claims, desktop CAD
-automation, and simulation quality control.
-
-\section{Achievement of the Aim}
+\section{Achievement of the Objectives}
 \label{sec:aim-achievement}
 
-The aim was achieved at the workflow-development and validation-preparation
-level. The project produced a working multi-part software artifact, analytical
-search results, native CAD evidence, boundary metadata, validation packages,
-and a preserved bracket proof of concept.
+The aim was achieved at the level of workflow development, analytical
+screening, native-CAD verification, and validation preparation. Unit-aware
+engineering definitions and screening models were completed for all three
+parts; the sampling and multi-start searches were executed; invalid
+evaluations were contained; native geometry, physical properties, exchange
+artifacts, and boundary evidence were produced; and analytical-to-CAD mass
+agreement was assessed. Table~\ref{tab:objective-achievement} records the
+status of each specific objective.
 
-The aim was not achieved at the level of certified structural design. The
-project did not complete corrected mesh-converged FEA for the three selected
-finalists, physical tests, or governing-code qualification. These activities
-were outside the achieved evidence level and are explicitly recommended.
+The aim was only partly achieved at the structural-validation level. The
+bracket reached manual FEA review, but the two exploratory studies did not use
+a sufficiently traceable and correct design load. Corrected, mesh-converged
+FEA has not yet been completed for the selected bracket, padeye, or stabilizer
+candidates.
+
+\section{Limitations}
+\label{sec:conclusion-limitations}
+
+The analytical models are first-order representations of selected load paths.
+They omit detailed fastener and weld behaviour, nonlinear contact,
+three-dimensional local stress, fatigue, buckling, corrosion, vibration,
+impact, and other component-specific service effects. The stabilizer load is a
+prescribed structural envelope rather than a pressure field derived from CFD,
+model tests, or measurements.
+
+The search uses a finite 60-point sample, three local starts, fixed bounds, and
+a penalty objective. A different seed, model, bound, or constraint strategy
+could produce a different finalist. Several selected parameters lie near
+their lower bounds, which indicates that manufacturing limits and omitted
+failure modes can materially affect the result.
+
+The CAD sweeps cover seeded design vectors rather than every point in the
+continuous space. They verify geometry, mass, artifacts, and boundary
+identification, but do not verify drawings, tolerances, assembly, weld access,
+or manufacturability. No acceptable finalist FEA or physical test result is
+available.
 
 \section{Recommendations}
 \label{sec:recommendations}
 
-\subsection{Immediate Bracket Validation}
-
 \begin{enumerate}
-    \item Recreate the bracket Static Stress study with a total downward
-    \textbf{1472 N} force on the four upper sloping rib faces.
-    \item Turn off force-per-entity so the four faces share the total force.
-    \item Confirm the four mounting-hole cylindrical faces are the only fixed
-    supports in the first idealization.
-    \item Record a total vertical support reaction close to 1472~N.
-    \item Use at least three systematically refined parabolic meshes.
-    \item Record stress at the peak and at stable nearby monitoring regions.
-    \item Compare the baseline, lightest finalist, and at least two conservative
-    finalists.
-    \item Add bolt bearing, fastener, weld, local plate, fatigue, corrosion,
-    and fabrication checks before selecting a design.
-\end{enumerate}
-
-\subsection{Padeye Validation}
-
-\begin{enumerate}
-    \item Confirm the governing lifting standard and load combinations before
-    final sizing.
-    \item Apply 14\,715~N through a verified bearing region for the first
-    screening study.
-    \item Develop a later pin-contact model with clearance and nonlinear
-    contact when the decision requires it.
-    \item Check net section, bearing, shear-out, lug root, gussets, welds,
-    doubler plate, and supporting structure.
-    \item Include out-of-plane load, load-angle variation, fatigue, fabrication,
+    \item Recreate the bracket study with a verified total load of 1472~N,
+    confirm its coordinate direction, keep force per entity disabled, and
+    demonstrate reaction balance. Compare the baseline, lightest finalist, and
+    conservative backup candidates using at least three systematically refined
+    meshes.
+    \item Replace the rigid hole constraint with more realistic bolt, bearing,
+    contact, and preload representations when these effects influence the
+    bracket decision. Assess local plate behaviour, rib-root and weld stress,
+    fatigue, corrosion allowance, fabrication tolerance, and supporting
+    structure.
+    \item Validate the padeye under the governing lifting standard and load
+    combinations. Begin with a distributed bearing model and progress to a
+    separate pin with clearance and nonlinear contact where required. Check
+    net section, bearing, shear-out, lug root, gussets, welds, fatigue,
     inspection, and proof-load requirements.
+    \item Derive stabilizer pressure cases from an accepted hydrodynamic method,
+    CFD, model tests, or measurements. Include positive and negative loading,
+    torsion, root and spar stresses, skin-panel buckling, fatigue, corrosion,
+    actuator interaction, vibration, and tip displacement.
+    \item Compare corrected FEA responses with the analytical predictions at
+    identical candidate geometries and loads. Any calibration should use
+    separate fitting and checking candidates and remain limited to the
+    supported parameter range.
+    \item Treat the lightest analytical row as one candidate rather than the
+    automatic design choice. Material certification, applicable codes,
+    uncertainty, fabrication, inspection, physical testing where required,
+    and qualified engineering review must precede acceptance.
 \end{enumerate}
 
-\subsection{Stabilizer Validation}
-
-\begin{enumerate}
-    \item Replace the assumed pressure distribution with a load case derived
-    from an accepted hydrodynamic method, CFD, model tests, or measured data.
-    \item Apply positive, negative, and torsional load cases as relevant.
-    \item Check root stress, tip displacement, spar and rib junctions,
-    skin--spar load transfer, local panel buckling, insert termination, flange,
-    and trailing edge.
-    \item Include fatigue, corrosion, actuator interaction, vibration, and
-    hydrodynamic uncertainty.
-    \item Select shell, solid, or mixed elements based on a convergence and
-    idealization study.
-\end{enumerate}
-
-\subsection{Software Development}
-
-\begin{enumerate}
-    \item Implement the documented \code{open\_fea} contract with a real mesh
-    and solver backend before exposing that mode as available.
-    \item Add adaptive or feasibility-first constraint handling and compare it
-    with the fixed penalty.
-    \item Add sensitivity and uncertainty analysis for loads, material
-    properties, concentration factors, and model coefficients.
-    \item Add one request directory per CAD job or a queue before allowing
-    concurrency.
-    \item Record software version, Fusion version, generator version, and input
-    hashes in every validation package.
-    \item Add automatic comparison between the requested load and any imported
-    solver report when a dependable report parser is available.
-\end{enumerate}
-
-\subsection{Model Calibration}
-
-After corrected FEA results exist, compare analytical and FEA response at the
-same candidate and load. If a systematic bias appears, revise the analytical
-coefficients or fit a correction model. Calibration must use separate
-candidates for fitting and checking. A corrected model should not be declared
-valid outside the parameter and load range supported by its evidence.
-
-\section{Recommended Validation Sequence}
-\label{sec:validation-sequence}
-
-The next project phase should follow this sequence:
-
-\begin{enumerate}
-    \item freeze the baseline and candidate parameter records;
-    \item verify material and load pedigree;
-    \item complete the corrected bracket FEA campaign;
-    \item compare analytical and FEA trends;
-    \item revise bounds or equations if the bracket model is non-conservative;
-    \item complete padeye linear screening FEA;
-    \item complete padeye pin-contact and code checks;
-    \item derive the stabilizer hydrodynamic load cases;
-    \item complete stabilizer static, buckling, and fatigue studies;
-    \item select conservative finalists rather than only the lightest rows;
-    \item fabricate and proof-test representative hardware where required; and
-    \item obtain qualified engineering review before service use.
-\end{enumerate}
-
-\section{Future Research}
+\section{Future Work}
 \label{sec:future-research}
 
-One future direction is a formal multi-fidelity optimizer. Selected FEA results
-could correct analytical predictions or train a surrogate with uncertainty.
-The optimization strategy could then select new high-fidelity points where
-they provide the greatest decision value.
+Future development can introduce a formal multi-fidelity strategy in which
+selected FEA results correct analytical bias or support a surrogate model with
+explicit uncertainty. Reliability-based optimization can then represent
+variability in loads, material properties, fabrication dimensions, corrosion,
+and modelling error.
 
-A second direction is reliability-based design. Loads, material properties,
-fabrication dimensions, corrosion loss, and model error can be represented as
-uncertain quantities. Candidate selection could then use probability of
-failure or reliability index instead of one deterministic factor of safety.
+The search can also be extended from single-objective mass minimization to a
+multi-objective formulation that includes fabrication cost, fatigue damage,
+displacement, or embodied carbon. Manufacturing-aware constraints should
+represent minimum gauges, available stock sizes, tool and inspection access,
+weld size, bend radii, and tolerance sensitivity.
 
-A third direction is multi-objective optimization. Mass can be balanced
-against fabrication cost, fatigue damage, displacement, or carbon impact.
-The result would be a Pareto set rather than one mass minimum.
-
-A fourth direction is manufacturing-aware optimization. Minimum gauges, stock
-sizes, tool access, bend radii, weld size, inspection access, additive
-manufacturing constraints, and tolerance sensitivity can become explicit
-variables or constraints.
-
-A fifth direction is broader marine integration. The stabilizer can connect
-to CFD or measured pressure data. The padeye can connect to lifting-operation
-load cases. The bracket can connect to equipment vibration and foundation
-stiffness. Each extension must preserve the evidence and claim boundaries used
-in the current project.
-
-\section{Final Statement}
-
-\NEMO\ shows that a student-scale engineering workflow can automate the
-repeatable parts of parametric search and CAD generation while leaving
-high-consequence structural judgment visible. The strongest conclusion is not
-that the lightest analytical candidates are ready for use. It is that the
-workflow makes it difficult to confuse a prediction, a CAD property, a solver
-setup, and a validated design.
-
-The project should therefore be continued as a validation program. The current
-repository provides the definitions, candidate history, CAD generators,
-boundary roles, checklists, and proof-of-concept lessons needed for that work.
+For the individual components, the bracket can be extended to equipment
+vibration and foundation flexibility, the padeye to lifting-operation load
+angles and proof testing, and the stabilizer to coupled hydrodynamic and
+structural loading. Each extension should preserve the distinction between a
+screening prediction, a CAD property, a solver result, and a validated design.

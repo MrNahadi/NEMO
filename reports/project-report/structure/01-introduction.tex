@@ -1,205 +1,79 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-\section{Chapter Overview}
-
-This chapter introduces the engineering problem, the project aim, the research
-questions, and the boundaries of the reported evidence. It also defines the
-project contribution and explains why the three selected components provide a
-useful test of one shared workflow. The chapter closes with the structure of
-the report.
+This chapter establishes the engineering context, defines the problem addressed
+by the study, and presents its aim, objectives, significance, and limits. The
+three component case studies are introduced together because they provide
+different tests of the same optimization and CAD--analysis workflow.
 
 \section{Background}
 \label{sec:background}
 
 Marine vessels and offshore systems contain many secondary structural
-components. Examples include machinery foundations, equipment brackets,
-lifting points, appendage roots, stiffeners, local doublers, and attachment
-details. A single component may be small compared with a hull or an offshore
-platform, but it can transfer a concentrated load into a much larger
-structure. Its behavior can therefore affect equipment alignment, lifting
-safety, watertight integrity, vibration, and the durability of adjacent
-structure.
+components, including machinery brackets, lifting points, appendage roots,
+stiffeners, doublers, and attachment details. Although small relative to the
+supporting vessel or platform, these components transfer concentrated or
+distributed loads into a larger structure. Their behaviour can therefore
+affect equipment alignment, lifting safety, vibration, watertight integrity,
+and the durability of adjacent structure.
 
-The load path through a small component is often three-dimensional. A bracket
-can combine baseplate bending, rib bending, fastener reactions, bearing,
-contact, and local stress at a fillet or weld. A padeye can combine pin
-bearing, net-section tension, shear-out, out-of-plane bending, lug-root
-stress, gusset action, and weld load transfer. A stabilizer fin can combine
-distributed pressure, root bending, shear, torsion, shell action, spar
-behavior, local buckling, fatigue, and hydrodynamic effects. A credible design
-process must identify which of these effects the selected model can represent
-and which effects remain outside its intended use.
+The load paths are often three-dimensional. A bracket can combine baseplate
+and rib bending, fastener reactions, bearing, contact, and local stress at
+fillets or welds. A padeye can combine pin bearing, net-section tension,
+shear-out, lug-root stress, gusset action, and weld load transfer. A stabilizer
+fin can combine distributed pressure, root bending, shear, torsion, shell
+action, local buckling, fatigue, and hydrodynamic effects. A credible design
+study must therefore distinguish the behaviour represented by its models from
+the failure modes that require later investigation.
 
-Mass is also an important design quantity. Added structural mass increases
-material use and can affect vessel displacement, payload, installation
-effort, fuel demand, and center-of-gravity management. However, mass reduction
-is not a sufficient design objective on its own. Removing material can reduce
-strength, stiffness, stability, fatigue life, corrosion reserve, fabrication
-tolerance, and damage tolerance. Marine component design is therefore a
-constrained task: mass can be reduced only while applicable strength,
-displacement, stability, fatigue, manufacturing, inspection, and service
-requirements remain satisfied.
+Mass reduction is useful because structural mass affects material use, vessel
+displacement, payload, installation effort, fuel demand, and
+centre-of-gravity management. It cannot, however, be pursued independently of
+strength, stiffness, stability, fatigue life, corrosion allowance,
+manufacturability, inspection, and damage tolerance. The design task is
+therefore formulated as constrained mass minimization.
 
-Traditional component development often moves between preliminary
-calculations, manual CAD edits, and selected FEA studies. This process can
-produce an acceptable design, but it normally examines only a small part of a
-multi-variable design space. The reasoning can also become fragmented.
-Dimensions may be held in a drawing, loads in a calculation sheet, materials
-in a simulation setup, boundary conditions in screenshots, and candidate
-history in personal notes. When the evidence becomes separated, a reviewer
-cannot easily reproduce the result or determine whether one image belongs to
-the same design as one table of values.
+Traditional development commonly alternates between preliminary calculations,
+manual CAD changes, and selected finite element analyses. This approach can
+produce acceptable designs, but it examines only a small portion of a
+multi-variable design space and can separate dimensions, loads, material data,
+boundary conditions, and results into unrelated records. Parametric modelling
+offers a more systematic basis for iteration. A family of geometries can be
+evaluated, compared, and reduced to a small set of candidates for
+higher-fidelity work. Research has connected commercial CAD and CAE tools to
+automated optimization loops \cite{park2010}; however, geometric change also
+alters the faces used for loads, supports, contacts, and mesh controls. The
+engineering meaning of these regions must be preserved, an issue described as
+the preservation of simulation intent \cite{nolan2015}.
 
-Parametric modeling provides a different basis for iteration. A parametric
-model represents a family of related designs rather than one fixed geometry.
-An optimization process can change the dimensions, evaluate each candidate,
-record its performance, and select candidates for more detailed work.
-Established research has connected commercial CAD and CAE tools into
-automated optimization loops \cite{park2010}. This integration can reduce
-repetitive work, but it introduces a difficult problem: a geometry change can
-also change the topology used for loads, supports, contacts, and mesh
-controls. The model must preserve the engineering meaning of these regions,
-not only rebuild a visually plausible solid. Nolan \emph{et al.} describe this
-need as the preservation of simulation intent \cite{nolan2015}.
+The Nelder-Mead Marine Optimizer (\NEMO) addresses this problem through a
+tiered workflow. First-order analytical models guide design-space exploration
+and optimization. Autodesk Fusion then rebuilds native geometry and provides
+physical-property evidence for selected candidates. Final FEA remains a
+human-reviewed activity because the public Fusion Python API used in this
+project did not provide a dependable route to initiate the required Static
+Stress solves and extract every required result. The workflow consequently
+keeps analytical predictions, CAD properties, and solver evidence as distinct
+claims.
 
-\section{Project Context}
-
-The Nelder-Mead Marine Optimizer (\NEMO) was developed in response to the
-combined problems of design-space exploration, traceability, and CAD--analysis
-handoff. The external Python application stores part definitions, evaluates
-analytical models, samples the design space, runs the optimizer, records
-results, and creates validation packages. The Autodesk Fusion add-in rebuilds
-native CAD, calculates physical properties, exports neutral geometry, and
-describes the faces associated with engineering boundary roles.
-
-The original proof-of-concept plan targeted a fully automatic cycle in which
-the optimizer would request a design, Fusion would rebuild the CAD and solve a
-Static Stress study, and the structural results would return to the optimizer.
-An implementation investigation found that the public Fusion Python API used
-by this project did not provide a dependable route to start the required
-Static Stress solves and extract all required result quantities. The project
-therefore changed to a tiered workflow. Low-cost analytical models guide the
-search, Fusion produces native CAD and mass evidence for selected designs, and
-an engineer prepares and checks final FEA studies manually.
-
-This change reduced the degree of automation, but it created a clearer
-evidence boundary. A CAD-only response contains volume, mass, and artifact
-paths. It leaves stress, factor of safety, and displacement empty. The
-reserved open-source FEA mode also returns a controlled failure because no
-Gmsh and CalculiX implementation currently exists. The software does not
-invent values when an evaluator is unavailable.
-
-\section{Problem Statement}
-\label{sec:problem-statement}
-
-This project addressed two related problems.
-
-The first problem concerned engineering efficiency. Manual iteration does not
-systematically explore the combined effects of plate size, stiffener
-dimensions, fillet radius, lug geometry, spar position, and reinforcement
-dimensions. A high-fidelity FEA solve for every candidate would require more
-time, software interaction, and computation than a resource-constrained
-student project could support. A practical method was needed to use inexpensive
-models for broad exploration and reserve manual FEA for a small, traceable
-candidate set.
-
-The second problem concerned evidence integrity. A useful workflow must
-preserve the connection between the engineering definition, design variables,
-calculated metrics, generated geometry, load and support regions, and
-validation record. A geometry generator must not report success when a
-required boundary region is missing. A stale response must not be attached to
-a new design. A CAD mass must not be presented as proof of structural
-performance. A solver report must not be accepted when its input load is
-incorrect.
-
-These problems lead to a narrow research gap. The methods used by the project
-are established, but they are rarely presented together as a small,
-inspectable reference workflow that works on an ordinary engineering
-workstation, supports several marine component archetypes, contains failure,
-and separates analytical, CAD, and FEA evidence.
-
-\section{Aim}
-
-The project aimed to develop and evaluate an auditable, resource-conscious
-workflow for the parameterized mass optimization and validation preparation
-of marine structural components.
-
-\section{Specific Objectives}
-\label{sec:objectives}
-
-The specific objectives were to:
-
-\begin{enumerate}
-    \item define part parameters, units, bounds, baselines, materials, loads,
-    constraints, fixed geometry, and semantic boundary roles in inspectable
-    source files;
-    \item develop first-order analytical models for mass, stress,
-    yield-based factor of safety, and displacement;
-    \item explore each bounded design space with seeded
-    Latin-hypercube sampling;
-    \item implement a scaled, bounded, multi-start Nelder--Mead search;
-    \item preserve invalid candidates and unavailable evaluators as controlled
-    failed records instead of terminating an optimization campaign;
-    \item implement a versioned file protocol between the external Python
-    application and an Autodesk Fusion add-in;
-    \item generate native Fusion geometry, STEP files, optional STL files,
-    physical properties, and semantic boundary metadata;
-    \item test each native CAD generator over its baseline and 20 seeded design
-    vectors;
-    \item prepare baseline and finalist packages for manual Fusion Static
-    Stress studies;
-    \item demonstrate the complete intended method with the bracket proof of
-    concept;
-    \item show how the same software architecture extends to a lifting padeye
-    and stabilizer fin; and
-    \item state the engineering evidence required before any manufacturing or
-    service decision.
-\end{enumerate}
-
-\section{Research Questions}
-\label{sec:research-questions}
-
-The study was guided by six questions:
-
-\begin{enumerate}
-    \item Can one part-aware software architecture represent and process a
-    bracket, padeye, and stabilizer without bracket-only assumptions in shared
-    workflow code?
-    \item Can seeded Latin-hypercube sampling and multi-start bounded
-    Nelder--Mead search find lower-mass, analytically feasible candidates for
-    all three parts?
-    \item Can the Fusion bridge rebuild valid native CAD and identify every
-    required semantic boundary role across bounded geometry changes?
-    \item How closely do analytical mass estimates agree with the Fusion CAD
-    mass for each baseline and selected finalist?
-    \item What evidence is still required before the analytical candidates can
-    be treated as validated structural designs?
-    \item What lessons does the bracket proof of concept provide for future
-    padeye and stabilizer FEA studies?
-\end{enumerate}
-
-\section{Case-Study Components}
-\label{sec:case-study-components}
-
-The three components represent different load paths and geometry classes.
-Table~\ref{tab:case-study-summary} gives their principal roles.
+Three components were selected to test the approach. Their principal
+characteristics are summarized in Table~\ref{tab:case-study-summary}.
 
 \begin{table}[H]
 \centering
-\caption{Case-study components and the engineering behavior represented}
+\caption{Case-study components and represented structural behaviour}
 \label{tab:case-study-summary}
 \begin{tabularx}{\textwidth}{p{0.15\textwidth}p{0.23\textwidth}XX}
 \toprule
 \textbf{Part} & \textbf{Material and load} & \textbf{Parameterized features} &
-\textbf{Principal behavior represented}\\
+\textbf{Principal behaviour represented}\\
 \midrule
 Bracket & Aluminum 6061-T6; 1.4715~kN equipment envelope &
 Baseplate, ribs, and fillet &
 Concentrated equipment load transferred through a ribbed plate to four
 mounting holes\\
 
-Padeye & S275 steel; 14.715~kN pin load envelope &
+Padeye & S275 steel; 14.715~kN pin-load envelope &
 Doubler, lug, neck, gussets, and fillet &
 Pinned lifting load transferred through a lug and reinforcement into a
 supporting plate\\
@@ -212,215 +86,147 @@ to a root flange\\
 \end{tabularx}
 \end{table}
 
-The bracket is the completed proof-of-concept case. It preserves the original
-project demonstration from a parameterized definition through analytical
-search, native CAD, and a manually prepared Static Stress study. The padeye
-and stabilizer use the same architecture and have analytical models, native
-CAD generators, semantic boundary roles, sweep evidence, and validation
-packages. Their final manual FEA campaigns remain future validation work.
+The bracket provides the complete proof of concept, from parameter definition
+and analytical search to native CAD and a manually prepared Static Stress
+study. The padeye and stabilizer demonstrate that the architecture can
+represent different variables, materials, loads, geometry, and boundary
+roles. Their manual FEA campaigns remain future validation work.
 
-\section{Research Contribution}
-\label{sec:contribution}
+\section{Problem Statement}
+\label{sec:problem-statement}
 
-The contribution is an implementation-and-evaluation contribution, not a new
-optimization algorithm. It has four main parts.
+Manual design iteration does not systematically explore the combined effects
+of plate dimensions, stiffener geometry, fillet radius, lug proportions, spar
+position, and reinforcement size. Conversely, solving a detailed FEA model
+for every candidate would require more time, computation, and software
+interaction than a resource-constrained student project can support. A
+practical method is needed to use inexpensive models for broad exploration
+and reserve manual FEA for a small, traceable candidate set.
 
-\subsection{Part-Aware Engineering Definitions}
+The method must also preserve evidence integrity. The engineering definition,
+design variables, calculated metrics, generated geometry, load and support
+regions, and validation record must remain connected. A generated solid is not
+a successful analysis if a required boundary region is absent; a stale CAD
+response must not be associated with a new design; CAD mass must not be
+presented as structural validation; and a completed solver report must be
+rejected when its applied load is incorrect.
 
-Each component is defined by one unit-aware manifest. The manifest contains
-exact parameter names, declared units, lower and upper bounds, baseline
-values, material properties, loads, constraints, fixed geometry, and semantic
-boundary roles. Evaluation, optimization, logging, validation packaging, and
-Fusion generation use the same definition. This design reduces the risk that
-one layer applies a different load, bound, or unit.
+The resulting research gap is not a lack of optimization algorithms or CAD
+software. It is the need for a compact, inspectable workflow that combines
+bounded design-space exploration, failure-contained evaluation, native CAD
+generation, semantic boundary identification, and an explicit separation of
+analytical, CAD, and FEA evidence on an ordinary engineering workstation.
 
-\subsection{Failure-Contained Optimization}
+\section{Aim and Objectives}
+\label{sec:objectives}
 
-The optimizer scales each variable to the interval from zero to one, clips
-trial points at the bounds, applies explicit penalties, caches repeated
-evaluations, and records every unique evaluation. Invalid candidates and
-unavailable evaluators return a controlled high objective. One bad candidate
-does not terminate the complete search. The final candidate selection filters
-explicitly for feasibility instead of assuming that the smallest penalized
-objective must pass every constraint.
+The project aims to develop and evaluate an auditable, resource-conscious
+workflow for the parameterized mass optimization and validation preparation
+of marine structural components.
 
-\subsection{Inspectable CAD Bridge}
+The specific objectives are to:
 
-The bridge separates two Python environments. The external environment can
-use the full project dependency set but cannot directly run inside Fusion.
-The Fusion environment has access to the native design API but should not rely
-on external scientific packages. Versioned JSON request and response files
-connect the environments. Atomic replacement reduces partial-read risk, while
-the run identifier and iteration prevent a stale response from being accepted
-as a new result.
+\begin{enumerate}
+    \item define unit-aware parameter spaces, materials, loads, constraints,
+    analytical screening models, and boundary roles for a bracket, padeye, and
+    stabilizer;
+    \item explore each bounded design space using seeded Latin-hypercube
+    sampling and scaled, multi-start Nelder--Mead optimization while retaining
+    invalid evaluations as controlled records;
+    \item generate native Fusion geometry, physical properties, exchange
+    artifacts, and semantic boundary metadata through a versioned CAD bridge;
+    \item verify each CAD generator at its baseline and 20 seeded design
+    vectors, and prepare traceable baseline and finalist validation sets;
+    \item evaluate the lower-mass analytical candidates and compare analytical
+    mass with native-CAD mass; and
+    \item demonstrate the bracket proof of concept and identify the further
+    evidence required before any manufacturing or service decision.
+\end{enumerate}
 
-\subsection{Semantic Boundary Evidence}
+These objectives are examined through four questions:
 
-Each generated CAD model identifies engineering regions such as
-\code{fixed\_support}, \code{equipment\_load}, \code{pin\_bearing},
-\code{pressure\_band\_1}, and \code{tip\_monitor}. The metadata records
-geometric selectors and face signatures. This method does not guarantee
-permanent CAD face identity, but it makes the intended load and support
-meaning explicit and gives the engineer a checkable starting point for FEA.
+\begin{enumerate}
+    \item Can one part-aware workflow represent and process the three component
+    types without embedding bracket-specific assumptions in shared operations?
+    \item Can seeded sampling and bounded multi-start search identify
+    lower-mass, analytically feasible candidates for all three parts?
+    \item Can native CAD and the required load and support regions remain
+    usable across bounded geometry changes, and how closely does CAD mass
+    agree with the analytical estimates?
+    \item What does the bracket proof of concept reveal about the evidence
+    required before the candidates can be accepted as structural designs?
+\end{enumerate}
 
 \section{Significance of the Study}
 \label{sec:significance}
 
-The work has engineering, educational, and software significance. From an
-engineering perspective, the workflow can reduce the number of designs that
-require manual CAD and FEA attention. It also shows where a low-cost model is
-adequate for ranking and where higher-fidelity work is necessary.
+The study demonstrates how low-cost analytical screening can reduce the number
+of candidates requiring manual CAD and FEA attention while retaining the
+information needed to review each decision. Its contribution is an
+implementation-and-evaluation workflow rather than a new optimization
+algorithm.
 
-From an educational perspective, the workflow makes hidden assumptions
-visible. A student can inspect the material, load derivation, bounds,
-equations, penalties, request files, response files, and validation
-checklists. The system therefore supports discussion of model credibility,
-not only the display of an optimized shape.
+The engineering definitions keep variables, units, bounds, materials, loads,
+constraints, and required boundary roles consistent across evaluation,
+optimization, candidate selection, and CAD generation. Scaled coordinates,
+bounded trials, explicit feasibility filtering, and controlled failed
+evaluations prevent one invalid design from ending a search or being promoted
+as an acceptable finalist. The CAD handoff records physical properties and
+identifies engineering regions such as fixed supports, equipment-load faces,
+pin-bearing surfaces, pressure bands, and displacement monitors. These records
+do not replace engineering judgement, but they make the intended load path
+inspectable.
 
-From a software perspective, the project shows how a small system can remain
-part-aware across the registry, analytical evaluation, optimizer, logger,
-dashboard, bridge, and CAD generator. It also shows the value of returning a
-controlled partial result. The absence of a solver result remains visible
-instead of being hidden behind a successful CAD operation.
+The workflow is also suitable for an educational setting because assumptions
+and evidence levels remain visible. It operates using existing student
+hardware, educational software access, open-source Python packages, and local
+data exchange. These resources have economic value, but the study required no
+new direct project expenditure.
 
-The zero-cash-cost execution is also important. The project used existing
-student hardware, educational software access, open-source Python packages,
-local file exchange, and university supervision. This arrangement makes the
-method accessible without a cloud-computing budget. It does not imply that
-the hardware, software access, electricity, internet, supervision, and
-student labor have no economic value. Chapter~\ref{chap:planning} distinguishes
-direct expenditure from these in-kind resources.
-
-\section{Scope}
+\section{Scope and Limitations}
 \label{sec:scope}
 
-\subsection{Implemented Software Scope}
-
-The implemented scope contains:
-
-\begin{itemize}
-    \item three registered part definitions;
-    \item first-order linear-elastic screening models;
-    \item six continuous bracket variables and nine variables for each of the
-    padeye and stabilizer;
-    \item mass minimization with factor-of-safety and displacement penalties;
-    \item random and Latin-hypercube sampling;
-    \item bounded multi-start Nelder--Mead optimization;
-    \item CSV and JSON run records;
-    \item a Streamlit results dashboard;
-    \item native Fusion generators for all three parts;
-    \item STEP and optional STL export;
-    \item semantic boundary metadata;
-    \item baseline plus 20-vector CAD generator sweeps;
-    \item baseline plus five-finalist validation packages; and
-    \item a bracket Static Stress setup demonstration.
-\end{itemize}
-
-\subsection{Engineering Scope}
+The implemented study covers three registered component definitions,
+first-order linear-elastic screening, six bracket variables, nine padeye
+variables, nine stabilizer variables, seeded sampling, bounded multi-start
+optimization, recorded run results, native Fusion generation, STEP and
+optional STL export, semantic boundary metadata, CAD sweeps, and baseline and
+finalist validation preparation. A results dashboard supports review of the
+recorded optimization data but does not provide a separate calculation model.
 
 The analytical models estimate mass, a governing stress, yield-based factor of
-safety, and displacement. The bracket model uses an equivalent cantilever
-representation. The padeye model compares net-section, bearing, shear-out,
-and lateral-bending stress estimates. The stabilizer model uses a root-section
-bending and shear representation under a prescribed distributed load.
+safety, and displacement. The bracket uses an equivalent cantilever
+representation; the padeye compares net-section, bearing, shear-out, and
+lateral-bending estimates; and the stabilizer uses root-section bending and
+shear under a prescribed distributed load. The models assume homogeneous,
+isotropic, linear-elastic material and declared design envelopes. They do not
+resolve detailed contact, fastener preload, weld behaviour, three-dimensional
+local stress, nonlinear response, shell buckling, fatigue, corrosion, impact,
+vibration, fluid--structure interaction, or hydrodynamic pressure prediction.
 
-These models support screening and ranking. They do not resolve local
-three-dimensional stress, fastener preload, weld detail, pin contact,
-geometric or material nonlinearity, shell buckling, fatigue damage, corrosion,
-impact, vibration, fluid--structure interaction, or hydrodynamic pressure
-prediction.
+The project uses software, analytical, CAD, and FEA evidence as separate
+levels. Software tests and analytical results are complete for the reported
+scope, and the CAD campaigns provide geometry, mass, artifacts, and
+boundary-role evidence. The bracket includes two exploratory solver studies,
+but neither supplies acceptable structural results: the second study records
+1.472~N rather than the intended 1472~N, while the first does not provide a
+complete traceable load definition. Padeye and stabilizer FEA remain future
+work.
 
-\subsection{Evidence Scope}
+The finite sample and three local starts do not establish a global optimum.
+The defensible optimization claim is the best feasible design found within
+the declared parameterized search. The project also does not establish
+classification compliance, fabrication readiness, or service safety.
+Acceptance would require verified loads and materials, applicable design-code
+checks, calibrated and mesh-converged FEA, relevant fatigue, buckling,
+corrosion, contact, fastener, and weld assessments, physical testing where
+required, and qualified engineering review.
 
-The report uses four evidence levels:
+\screeningwarning
 
-\begin{enumerate}
-    \item \textbf{software evidence}, from automated offline tests and
-    controlled command-line runs;
-    \item \textbf{analytical evidence}, from the declared first-order models;
-    \item \textbf{CAD evidence}, from native geometry, mass, volume, exports,
-    and boundary-role sweeps; and
-    \item \textbf{FEA evidence}, which requires checked inputs, equilibrium,
-    mesh convergence, and correctly recorded solver outputs.
-\end{enumerate}
-
-Only the first three levels are complete for all parts. The bracket has a
-manual FEA setup report, but its saved load is incorrect by a factor of one
-thousand. Its numerical solver results are therefore excluded from structural
-acceptance.
-
-\section{Assumptions}
-\label{sec:assumptions}
-
-The principal assumptions are:
-
-\begin{enumerate}
-    \item the declared material properties represent homogeneous, isotropic,
-    linear-elastic material during screening;
-    \item the bracket design envelope uses a 50~kg equipment mass and a
-    dynamic amplification factor of 3;
-    \item the padeye design envelope uses a 500~kg working mass and a dynamic
-    amplification factor of 3;
-    \item the stabilizer load uses a prescribed lift coefficient, planform
-    area, speed, seawater density, dynamic factor, and spanwise load
-    distribution;
-    \item the declared parameter bounds prevent most grossly invalid geometry
-    but do not prove manufacturability;
-    \item the factor-of-safety constraint uses material yield strength and does
-    not represent fatigue or buckling;
-    \item the displacement limits are project criteria, not class-approved
-    service limits; and
-    \item the native CAD mass provides a geometry consistency check but does
-    not validate stress or displacement.
-\end{enumerate}
-
-\section{Limitations and Delimitations}
-\label{sec:intro-limitations}
-
-The study does not claim a global optimum. Nelder--Mead is a local method, the
-number of starts is finite, and a 60-point sample remains sparse in a
-nine-dimensional space. The defensible claim is the best feasible design
-found within the declared parameterized search.
-
-The project does not complete a formal multi-fidelity optimization loop.
-Analytical predictions are not automatically corrected by FEA. The current
-workflow is tiered: analytical screening comes first, CAD verification comes
-second, and manual FEA comes last.
-
-The project does not establish classification compliance, statutory
-compliance, fabrication readiness, or service safety. A later design stage
-must select the governing rules and load combinations, verify material and
-fabrication data, perform calibrated FEA, address fatigue, buckling,
-corrosion, contact, fasteners, and welds, and obtain qualified engineering
-review.
-
-\section{Safety and Claim Boundary}
-\label{sec:claim-boundary}
-
-Every analytical value in this report is a screening estimate. A design with
-a reported factor of safety above 2.5 has passed the implemented yield-based
-screening equation. It has not passed all relevant marine failure modes. A
-successful CAD generation result proves only that the requested geometry and
-artifacts were produced under the generator acceptance checks.
-
-A Fusion study is not credible only because it solved. The material, load,
-support, contacts, mesh, equilibrium, result location, and convergence must
-also be correct. This principle is demonstrated by the bracket report: Fusion
-completed a solve, but inspection found that the study used 1.472~N instead of
-1472~N. The project rejects those numerical results.
-
-\section{Organization of the Report}
-
-Chapter~\ref{chap:literature} reviews constrained structural optimization,
-derivative-free search, sampling, tiered model fidelity, CAD--CAE
-integration, simulation intent, marine applications, and FEA credibility.
-Chapter~\ref{chap:methodology} describes the engineering definitions,
-analytical models, optimizer, data contracts, CAD bridge, verification method,
-and bracket FEA procedure. Chapter~\ref{chap:results} presents the analytical,
-software, and CAD results and discusses the FEA quality-control finding.
-Chapter~\ref{chap:planning} gives the zero-cash-cost budget, work breakdown,
-13-week workplan, Gantt chart, milestones, responsibilities, and risk plan.
-Chapter~\ref{chap:conclusion} answers the research questions and gives the
-conclusions and recommendations. The appendices provide detailed parameter
-tables, reproduction procedures, schema examples, and the validation
-checklist.
+Chapter~\ref{chap:literature} reviews the relevant optimization, CAD--CAE, and
+structural-analysis literature. Chapter~\ref{chap:methodology} presents the
+models and study method. Chapter~\ref{chap:results} reports and discusses the
+analytical, CAD, and bracket-study evidence. Chapter~\ref{chap:conclusion}
+states the conclusions, achievement of the objectives, limitations,
+recommendations, and future work.

@@ -1,0 +1,83 @@
+\chapter{Project Workplan}
+\label{chap:workplan}
+
+This chapter presents the project schedule from September 2026 to March 2027.
+The workplan groups the study into research and engineering definition,
+implementation, verification, and reporting activities. Detailed technical
+methods and findings are presented in Chapters~\ref{chap:methodology} and
+\ref{chap:results}, respectively.
+
+\section{Project Schedule}
+\label{sec:workplan}
+
+The workplan spans seven months. September and October establish the research
+basis, engineering definitions, and bracket proof of concept. November and
+December develop the design-space search, result records, and multi-part
+architecture. January and February focus on native CAD generation,
+verification, validation preparation, and analysis of the results. March is
+reserved for final reporting, demonstration, corrections, and submission.
+
+The Fusion proof of concept provides the principal technical decision point.
+Because the public API does not provide dependable automated control of the
+Static Stress workspace, the workflow retains analytical optimization and
+native CAD generation while treating solver assessment as a controlled manual
+activity. Figure~\ref{fig:gantt} summarizes the sequence. Documentation and
+report writing overlap the engineering work because assumptions, decisions,
+and evidence are recorded throughout the project.
+
+\begin{figure}[H]
+\centering
+\begin{ganttchart}[
+    hgrid,
+    vgrid,
+    x unit=1.05cm,
+    y unit title=0.62cm,
+    y unit chart=0.55cm,
+    title label font=\bfseries\scriptsize,
+    bar label font=\scriptsize,
+    group label font=\bfseries\scriptsize,
+    milestone label font=\scriptsize,
+    bar/.append style={fill=nemoblue!35,draw=nemoblue},
+    group/.append style={fill=nemoteal!35,draw=nemoteal},
+    milestone/.append style={fill=nemoorange,draw=nemoorange}
+]{1}{7}
+\gantttitle{2026}{4}\gantttitle{2027}{3}\\
+\gantttitle{Sep}{1}
+\gantttitle{Oct}{1}
+\gantttitle{Nov}{1}
+\gantttitle{Dec}{1}
+\gantttitle{Jan}{1}
+\gantttitle{Feb}{1}
+\gantttitle{Mar}{1}\\
+
+\ganttgroup{Research and definition}{1}{2}\\
+\ganttbar{Scope and literature}{1}{2}\\
+\ganttbar{Bracket model}{1}{2}\\
+
+\ganttgroup{Implementation}{2}{5}\\
+\ganttbar{Fusion proof of concept}{2}{3}\\
+\ganttbar{Sampling and optimization}{3}{4}\\
+\ganttbar{Padeye and stabilizer}{4}{5}\\
+\ganttbar{Native CAD generators}{5}{5}\\
+
+\ganttgroup{Verification and reporting}{5}{7}\\
+\ganttbar{Tests and CAD sweeps}{5}{6}\\
+\ganttbar{FEA preparation and results}{6}{6}\\
+\ganttbar{Documentation and report}{1}{7}\\
+\ganttbar{Final QA and demonstration}{7}{7}\\
+\ganttmilestone{Submission}{7}
+\end{ganttchart}
+\caption{Project workplan for September 2026 to March 2027}
+\label{fig:gantt}
+\end{figure}
+
+\section{Workplan Review}
+\label{sec:workplan-review}
+
+The schedule allows analytical development and CAD verification to proceed
+before the final simulation review. This sequencing limits the number of
+candidates that require higher-fidelity assessment. It also provides time in
+March for resolving report corrections and presenting the evidence generated
+by the project. Where Fusion-dependent work is delayed, the analytical models,
+recorded CAD requests, and validation packages preserve progress and allow the
+affected activity to resume without repeating the full design-space search.
